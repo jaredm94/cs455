@@ -64,9 +64,9 @@ int main(int argc, char *argv[])
 
         /* Wait for a client to connect */
         if ((clntSock = accept(servSock, (struct sockaddr *) &clntAddr,&clntLen)) < 0)
-		DieWithError("accept() failed");
-        /* clntSock is connected to a client! */
-
+			DieWithError("accept() failed");
+    
+	    /* clntSock is connected to a client! */
         printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
 
 		int read = 0; // hold bytes read on each call
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 		{
 			int bytesRecvd = 0;
 			char buf2[RCVBUFSIZE];
+
 			while((read = recv(clntSock, buffer, RCVBUFSIZE-1, 0))> 0)
 			{
 				if(bytesRecvd == 0) // initial read
@@ -83,12 +84,12 @@ int main(int argc, char *argv[])
 				}
 				bytesRecvd += read;
 				totalBytesRecvd += read;	
+
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
 							for(;read<RCVBUFSIZE;)
-							 bytesRecvd = 0;
-																				break; // null
+							 bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		bytesRecvd = 0;									break; // givenLengthCmd
 					case 3:		bytesRecvd = 0;									break; // badIntCmd
 					case 4:		bytesRecvd = 0;									break; // goodIntCmd
