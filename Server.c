@@ -4,7 +4,7 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
-#include "project1.h"
+
 
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
 #define RCVBUFSIZE 500
@@ -23,10 +23,8 @@ void nullTerminatedCmd(int sock,char * arr, int bytesread)
 
 
 int16_t len = strlen(arr);
-char buff[500];
-memset(buff,0,500);
 
-char buff[500] = "Null Terminated: ";
+char buff = "Null Terminated: ";
 int k = strlen(buff);
 
 memcpy(buff+k,&len,2);
@@ -38,30 +36,6 @@ return;
 }
 
 
-void givenLengthcmd(int sock,char * arr, int bytesread)
-{
-
-char temp[2];
- memcpy(temp,arr,2);
-
-int16_t len = atio(temp)
-len = ntos(len);
-
-
-char buff[500];
-memset(buff,0,500);
-
-char buff[500] = "Given Length: " ;
-int k = strlen(buff);
-
-memcpy(buff+k,&len,2);
-
-send(sock,buff,k+2,0);
-
-return;
-
-}
-
 
 void givenLengthcmd(int sock,char * arr, int bytesread)
 {
@@ -69,12 +43,9 @@ void givenLengthcmd(int sock,char * arr, int bytesread)
 char temp[2];
  memcpy(temp,arr,2);
 
-int16_t len = atio(temp)
-len = ntos(len);
+int16_t len = atoi(temp);
+len = ntohs(len);
 
-
-char buff[500];
-memset(buff,0,500);
 
 char buff[500] = "Given Length: " ;
 int k = strlen(buff);
@@ -94,11 +65,11 @@ void goodIntCmd(int  sock, char * arr)
 int j = atoi(arr);
 j = ntohl(j);
 char * m = "Good Int: ";
-char buf[strnlen(m)+4+1];
+char buf[strlen(m)+4+1];
 
-memcpy(buf,m,strnlen(m));
+memcpy(buf,m,strlen(m));
 memcpy(buf+strlen(m),&j,4);
-send(sock,buff,strlen(m)+4)
+send(sock,buf,strlen(m)+4,0);
 
 }
 
@@ -108,11 +79,11 @@ void BadIntCmd(int  sock, char * arr)
 int j = atoi(arr);
 j = ntohl(j);
 char * m = "Bad Int: ";
-char buf[strnlen(m)+4];
+char buf[strlen(m)+4];
 
-memcpy(buf,m,strnlen(m));
+memcpy(buf,m,strlen(m));
 memcpy(buf+strlen(m),&j,4);
-send(sock,buff,strlen(m)+4);
+send(sock,buf,strlen(m)+4,0);
 
 }
 
@@ -123,7 +94,7 @@ int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 
 
     int num = atoi(arr);
-    num = ntol(num);
+    num = ntohl(num);
     char buf = 0;
     bytesread -= 4;
 // subtract what weve already Read
@@ -156,8 +127,8 @@ int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
 
 
     int num = atoi(arr);
-    num = ntol(num);
-    char buf[1000] = 0;
+    num = ntohl(num);
+    char buf[1000];
     bytesread -= 4;
 // subtract what weve already Read
 
@@ -196,7 +167,7 @@ int main(int argc, char *argv[])
 	char buffer[RCVBUFSIZE];
 	FILE *log;
 	log  = fopen("log.txt", 'a'); // open log file for append
-	
+
     if (argc != 2)     /* Test for correct number of arguments */
     {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
@@ -232,7 +203,7 @@ int main(int argc, char *argv[])
         /* Wait for a client to connect */
         if ((clntSock = accept(servSock, (struct sockaddr *) &clntAddr,&clntLen)) < 0)
 			DieWithError("accept() failed");
-    
+
 	    /* clntSock is connected to a client! */
         printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
 
@@ -250,12 +221,12 @@ int main(int argc, char *argv[])
 					memset(buf2, 0, RCVBUFSIZE); // reset buf2 to 0
 				}
 				bytesRecvd += read;
-				totalBytesRecvd += read;	
+				totalBytesRecvd += read;
 
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
-								nullTerminatedCmd(clntSock, buffer, read); 
+								nullTerminatedCmd(clntSock, buffer, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		givenLengthcmd(clntSock, buffer, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
