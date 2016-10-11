@@ -24,7 +24,7 @@ void nullTerminatedCmd(int sock,char * arr, int bytesread)
 
 int16_t len = strlen(arr);
 
-char buff = "Null Terminated: ";
+char buff[500] = "Null Terminated: ";
 int k = strlen(buff);
 
 memcpy(buff+k,arr,len);
@@ -40,10 +40,11 @@ return;
 void givenLengthcmd(int sock,char * arr, int bytesread)
 {
 
-char temp[2];
- memcpy(temp,arr,2);
+//char temp[2];
+// memcpy(temp,arr,2);
 
-int16_t len = atoi(temp);
+int16_t len;
+memcpy(len,arr,2);
 len = ntohs(len);
 
 
@@ -62,7 +63,8 @@ return;
 void goodIntCmd(int  sock, char * arr)
 {
 
-int j = atoi(arr);
+int j;
+memccpy(j,arr,4);
 j = ntohl(j);
 char * m = "Good Int: ";
 char buf[strlen(m)+4+1];
@@ -76,7 +78,8 @@ send(sock,buf,strlen(m)+4,0);
 void BadIntCmd(int  sock, char * arr)
 {
 
-int j = atoi(arr);
+int j;
+memccpy(j,arr,4);
 j = ntohl(j);
 char * m = "Bad Int: ";
 char buf[strlen(m)+4];
