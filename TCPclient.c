@@ -214,7 +214,9 @@ int main(int argc, char *argv[])
     unsigned int StringLen;      /* Length of string to echo */
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                         and total bytes read */
-  
+    int send = 3;
+
+
 
  //   if (argc < 2)    /* Test for correct number of arguments */
    // {
@@ -251,20 +253,18 @@ totalBytesRcvd = 0;
 
 int i= 0; // holds bytes read on each call.
 
-while(i<2)
+while(1)
 {
 
 int secondwhilbytes = 0;
-char * temp = "SHITTY SERVER";
-if(i==0){
-  send(sock,temp,sizeof(temp),0);
-}
+char buf2[500];
 
-//nullTerminatedCmd("Send as a Null Terminated String.", sock);
-//givenLengthCmd("Sent as unterminated string",sock);
+nullTerminatedCmd("Send as a Null Terminated String.", sock);
+givenLengthCmd("Sent as unterminated string",sock);
 
 
-i++;
+
+
 
 
 }
