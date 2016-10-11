@@ -44,7 +44,7 @@ void givenLengthcmd(int sock,char * arr, int bytesread)
 // memcpy(temp,arr,2);
 
 int16_t len;
-memcpy(len,arr,2);
+memcpy(&len,arr,2);
 len = ntohs(len);
 
 
