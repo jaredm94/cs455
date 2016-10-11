@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     unsigned int StringLen;      /* Length of string to echo */
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                         and total bytes read */
-int send = 3;
+    int send = 3;
 
 
 
@@ -234,92 +234,19 @@ while(1)
 int secondwhilbytes = 0;
 char buf2[500];
 
+send()
+
 while((i = recv(sock, Buffer, RCVBUFSIZE - 1, 0))>0)
 {
 
-  if(secondwhilbytes == 0 )
-  {
-    memset(buf2, 0, 500);
-  }
-
-  whilebytesRcvd += i;
-  secondwhilbytes += i;
-
-
-  switch((int8_t)Buffer[0])
-  {
-    //noMoreCommands
-    case 0:
-
-        secondwhilbytes =0;
-        break;
-
-        //null
-        case 1:
-            i=0;
-            for(;i<500)
-            secondwhilbytes = 0;
-            break;
-
-          //givenLengthCmd
-            case 2:
-
-                secondwhilbytes = 0;
-                break;
-
-                //badIntCmd
-                case 3:
-
-                    secondwhilbytes =0;
-                    break;
-
-                    //goodIntCmd
-                    case 4:
-
-                        secondwhilbytes = 0;
-                        break;
-
-                        //byteAtATimeCmd
-                        case 5:
-
-                            secondwhilbytes =0;
-                            break;
-
-                            //KbyteAtATimeCmd
-                            case 6:
-
-                                secondwhilbytes = 0;
-                                break;
-
-  }
-
-}
+  printf("%s\n",Buffer);
 
 
 
 }
 
-
+}
     close(sock);
     exit(0);
 }
-/*
-//    StringLen = strlen(String);          /* Determine input length */
-//
-  ///  /* Send the string to the server */
-  //f (send(sock, String, StringLen, 0) != StringLen)
-    //    DieWithError("send() sent a different number of bytes than expected");
 
-    /* Receive the same string back from the server */
-  //  totalBytesRcvd = 0;
-//    printf("Received: ");                /* Setup to print the echoed string */
-//    while (totalBytesRcvd < StringLen)
-//    {
-        /* Receive up to the buffer size (minus 1 to leave space for
-           a null terminator) bytes from the sender */
-//        if ((bytesRcvd = recv(sock, Buffer, RCVBUFSIZE - 1, 0)) <= 0)
-//DieWithError("recv() failed or connection closed prematurely");
-  ///      totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-//        Buffer[bytesRcvd] = '\0';  /* Terminate the string! */
-//        printf("%s", Buffer);      /* Print the echo buffer */
-//    }
