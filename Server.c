@@ -27,9 +27,9 @@ int16_t len = strlen(arr);
 char buff = "Null Terminated: ";
 int k = strlen(buff);
 
-memcpy(buff+k,&len,2);
+memcpy(buff+k,arr,len);
 
-send(sock,buff,k+2,0);
+send(sock,buff,k+len,0);
 
 return;
 
@@ -50,9 +50,9 @@ len = ntohs(len);
 char buff[500] = "Given Length: " ;
 int k = strlen(buff);
 
-memcpy(buff+k,&len,2);
+memcpy(buff+k,arr+2,len);
 
-send(sock,buff,k+2,0);
+send(sock,buff,len+k,0);
 
 return;
 
@@ -218,7 +218,7 @@ printf("#1\n");
 			while(1)
 			{
 
-        read = recv(clntSock, buffer+bytesRecvd, 2, 0);
+        read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
         printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
 
@@ -232,18 +232,18 @@ printf("#1\n");
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
-								nullTerminatedCmd(clntSock, buffer, read);
+								nullTerminatedCmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmd(clntSock, buffer, read);
+					case 2:		givenLengthcmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer);
+					case 3:		goodIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer);
+					case 4:		BadIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
-								bytesAtATimeCmd(clntSock, buffer, read);		break; // bytesAtATimeCmd
+								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;
-								kbytesAtATimeCmd(clntSock, buffer, read);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
