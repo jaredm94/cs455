@@ -64,7 +64,7 @@ void goodIntCmd(int  sock, char * arr)
 {
 
 int j;
-memccpy(j,arr,4);
+memcpy(&j,arr,4);
 j = ntohl(j);
 char * m = "Good Int: ";
 char buf[strlen(m)+4+1];
@@ -79,7 +79,7 @@ void BadIntCmd(int  sock, char * arr)
 {
 
 int j;
-memccpy(j,arr,4);
+memcpy(&j,arr,4);
 j = ntohl(j);
 char * m = "Bad Int: ";
 char buf[strlen(m)+4];
