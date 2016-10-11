@@ -27,7 +27,9 @@ int main(int argc, char *argv[])
     unsigned int clntLen;            /* Length of client address data structure */
     int totalBytesRecvd = 0;
 	char buffer[RCVBUFSIZE];
-
+	FILE *log;
+	log  = fopen("log.txt", 'a'); // open log file for append
+	
     if (argc != 2)     /* Test for correct number of arguments */
     {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
@@ -95,10 +97,12 @@ int main(int argc, char *argv[])
 					case 6:		recvCalls++;
 								serverKByteAtATimeCmd(clntSock, recvCalls);		break; // KbyteAtATimeCmd
 			    }
+				fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
 		}
 	}
 	close(servSock);
+	fclose(log);
 	exit(0);
     /* NOT REACHED */
 }
@@ -119,14 +123,11 @@ int serverKByteAtATimeCmd()
 {
     char sendBuf[500];
     char line[500];
-    int8_t netByteOrder = htons(numOps);                // not sure if 'int8_t' is the proper type for n
-etwork byte order
+    int8_t netByteOrder = htons(numOps);                // not sure if 'int8_t' is the proper type for network byte order
 
-    sprintf(line, "kByteAtATimeCmd: %d", (numOps));    // love love love love sprinf lolololol
+    sprintf(line, "kByteAtATimeCmd: %d", (numOps));    // love love love love sprintf lolololol
     int8_t netByteOrder = htons(strlen(line));
     memcpy(sendBuf, netByteOrder, 2);
     memcpy(sendBuf + 2, line, strlen(line));
-    send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-byt
-es... hmmm... not sure...
-
+    send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
 }
