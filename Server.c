@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 			int bytesRecvd = 0;
 			char buf2[RCVBUFSIZE];
 
-			while((read = recv(clntSock, buffer, RCVBUFSIZE-1, 0))> 0)
+			while((read = recv(clntSock, buffer+bytesRecvd, RCVBUFSIZE-1, 0))> 0)
 			{
 				if(bytesRecvd == 0) // initial read
 				{
@@ -257,15 +257,18 @@ int main(int argc, char *argv[])
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
-							for(;read<RCVBUFSIZE;)
-							 bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		bytesRecvd = 0;									break; // badIntCmd
-					case 4:		bytesRecvd = 0;									break; // goodIntCmd
+								nullTerminatedCmd(clntSock, buffer + 1, read); 
+								bytesRecvd = 0;									break; // nullTerminatedCmd
+					case 2:		givenLengthcmd(clntSock, buffer + 1, read);
+								bytesRecvd = 0;									break; // givenLengthCmd
+					case 3:		goodIntCmd(clntSock, buffer + 1);
+								bytesRecvd = 0;									break; // badIntCmd
+					case 4:		BadIntCmd(clntSock, buffer + 1);
+								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
-								serverByteAtATimeCmd(clntSock, recvCalls);		break; // bytesAtATimeCmd
+								bytesAtATimeCmd(clntSock, buffer + 1, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;
-								serverKByteAtATimeCmd(clntSock, recvCalls);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmd(clntSock, buffer + 1, read);		break; // KbyteAtATimeCmd
 			    }
 				fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
