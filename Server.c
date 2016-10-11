@@ -166,7 +166,8 @@ int main(int argc, char *argv[])
     int totalBytesRecvd = 0;
 	char buffer[RCVBUFSIZE];
 	FILE *log;
-	log  = fopen("log.txt", 'a'); // open log file for append
+  printf("#3\n");
+	//log  = fopen("log.txt", 'a'); // open log file for append
 
     if (argc != 2)     /* Test for correct number of arguments */
     {
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
     servAddr.sin_family = AF_INET;                /* Internet address family */
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     servAddr.sin_port = htons(servPort);      /* Local port */
-
+printf("#2\n");
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
         DieWithError("bind() failed");
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
     /* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
-
+printf("#1\n");
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */
@@ -214,8 +215,13 @@ int main(int argc, char *argv[])
 			int bytesRecvd = 0;
 			char buf2[RCVBUFSIZE];
 
-			while((read = recv(clntSock, buffer+bytesRecvd, RCVBUFSIZE-1, 0))> 0)
+			while(1)
 			{
+
+        read = recv(clntSock, buffer+bytesRecvd, 2, 0);
+
+        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
+
 				if(bytesRecvd == 0) // initial read
 				{
 					memset(buf2, 0, RCVBUFSIZE); // reset buf2 to 0
@@ -239,12 +245,12 @@ int main(int argc, char *argv[])
 					case 6:		recvCalls++;
 								kbytesAtATimeCmd(clntSock, buffer, read);		break; // KbyteAtATimeCmd
 			    }
-				fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
+				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
 		}
 	}
 	close(servSock);
-	fclose(log);
+//	fclose(log);
 	exit(0);
     /* NOT REACHED */
 }
