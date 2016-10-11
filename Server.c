@@ -67,7 +67,8 @@ int main(int argc, char *argv[])
 
         printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
 
-	int read = 0; // hold bytes read on each call
+		int read = 0; // hold bytes read on each call
+		int recvCalls = 0;
         while(1)
 		{
 			int bytesRecvd = 0;
@@ -85,12 +86,14 @@ int main(int argc, char *argv[])
 					case 1:		read = 0;
 							for(;read<RCVBUFSIZE;)
 							 bytesRecvd = 0;
-													break; // null
-					case 2:		bytesRecvd = 0;		break; // givenLengthCmd
-					case 3:		bytesRecvd = 0;		break; // badIntCmd
-					case 4:		bytesRecvd = 0;		break; // goodIntCmd
-					case 5:		bytesRecvd = 0;		break; // bytesAtATimeCmd
-					case 6:		bytesRecvd = 0;		break; // KbyteAtATimeCmd
+																				break; // null
+					case 2:		bytesRecvd = 0;									break; // givenLengthCmd
+					case 3:		bytesRecvd = 0;									break; // badIntCmd
+					case 4:		bytesRecvd = 0;									break; // goodIntCmd
+					case 5:		recvCalls++;
+								serverByteAtATimeCmd(clntSock, recvCalls);		break; // bytesAtATimeCmd
+					case 6:		recvCalls++;
+								serverKByteAtATimeCmd(clntSock, recvCalls);		break; // KbyteAtATimeCmd
 			    }
 			}
 		}
@@ -99,15 +102,31 @@ int main(int argc, char *argv[])
 	exit(0);
     /* NOT REACHED */
 }
-int serverBytesAtATimeCmd(int sock, int bytesRead)
+int serverByteAtATimeCmd(int sock, int numOps)
 {
-	char sendBuff[500];
-	char *commandRcvd = "byteAtATimeCmd";
-	memcpy(buf, commandRcvd, sizeof(commandRcvd + 1));
-	memcpy(buf[sizeof(commandRcvd) + 1],  
+	char sendBuf[500];
+	char line[500];
+	int8_t netByteOrder = htons(numOps);         		// not sure if 'int8_t' is the proper type for network byte order
+
+	sprintf(line, "byteAtATimeCmd: %d", (numOps));  	// love love love love sprinf lolololol
+	int8_t netByteOrder = htons(strlen(line));
+	memcpy(sendBuf, netByteOrder, 2);
+	memcpy(sendBuf + 2, line, strlen(line));
+	send(sock, sendBuf, strlen(line) + 2, 0);			// netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
 }
 
-int serverKBytesAtATimeCmd()
+int serverKByteAtATimeCmd()
 {
+    char sendBuf[500];
+    char line[500];
+    int8_t netByteOrder = htons(numOps);                // not sure if 'int8_t' is the proper type for n
+etwork byte order
+
+    sprintf(line, "kByteAtATimeCmd: %d", (numOps));    // love love love love sprinf lolololol
+    int8_t netByteOrder = htons(strlen(line));
+    memcpy(sendBuf, netByteOrder, 2);
+    memcpy(sendBuf + 2, line, strlen(line));
+    send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-byt
+es... hmmm... not sure...
 
 }
