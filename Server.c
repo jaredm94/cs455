@@ -92,15 +92,13 @@ void goodIntCmd(int  sock, char * arr)
 {
 
 int j = atoi(arr);
-j = htons(j);
+j = ntohl(j);
 char * m = "Good Int: ";
-char buf[strnlen(m)+4];
+char buf[strnlen(m)+4+1];
 
 memcpy(buf,m,strnlen(m));
 memcpy(buf+strlen(m),&j,4);
-send(sock,buff,strlen(m)+4);
-
-
+send(sock,buff,strlen(m)+4)
 
 }
 
@@ -108,7 +106,7 @@ void BadIntCmd(int  sock, char * arr)
 {
 
 int j = atoi(arr);
-j = htons(j);
+j = ntohl(j);
 char * m = "Bad Int: ";
 char buf[strnlen(m)+4];
 
@@ -257,18 +255,18 @@ int main(int argc, char *argv[])
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
-								nullTerminatedCmd(clntSock, buffer + 1, read); 
+								nullTerminatedCmd(clntSock, buffer, read); 
 								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmd(clntSock, buffer + 1, read);
+					case 2:		givenLengthcmd(clntSock, buffer, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer + 1);
+					case 3:		goodIntCmd(clntSock, buffer);
 								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer + 1);
+					case 4:		BadIntCmd(clntSock, buffer);
 								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
-								bytesAtATimeCmd(clntSock, buffer + 1, read);		break; // bytesAtATimeCmd
+								bytesAtATimeCmd(clntSock, buffer, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;
-								kbytesAtATimeCmd(clntSock, buffer + 1, read);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmd(clntSock, buffer, read);		break; // KbyteAtATimeCmd
 			    }
 				fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
@@ -279,7 +277,7 @@ int main(int argc, char *argv[])
 	exit(0);
     /* NOT REACHED */
 }
-int serverByteAtATimeCmd(int sock, int numOps)
+/*int serverByteAtATimeCmd(int sock, int numOps)
 {
 	char sendBuf[500];
 	char line[500];
@@ -304,3 +302,4 @@ int serverKByteAtATimeCmd()
     memcpy(sendBuf + 2, line, strlen(line));
     send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
 }
+*/
