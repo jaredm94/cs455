@@ -17,6 +17,175 @@ fprintf(stderr,"%s",err);
 exit(0);
 
 }
+
+void nullTerminatedCmd(int sock,char * arr, int bytesread)
+{
+
+
+int16_t len = strlen(arr);
+char buff[500];
+memset(buff,0,500);
+
+char buff[500] = "Null Terminated: ";
+int k = strlen(buff);
+
+memcpy(buff+k,&len,2);
+
+send(sock,buff,k+2,0);
+
+return;
+
+}
+
+
+void givenLengthcmd(int sock,char * arr, int bytesread)
+{
+
+char temp[2];
+ memcpy(temp,arr,2);
+
+int16_t len = atio(temp)
+len = ntos(len);
+
+
+char buff[500];
+memset(buff,0,500);
+
+char buff[500] = "Given Length: " ;
+int k = strlen(buff);
+
+memcpy(buff+k,&len,2);
+
+send(sock,buff,k+2,0);
+
+return;
+
+}
+
+
+void givenLengthcmd(int sock,char * arr, int bytesread)
+{
+
+char temp[2];
+ memcpy(temp,arr,2);
+
+int16_t len = atio(temp)
+len = ntos(len);
+
+
+char buff[500];
+memset(buff,0,500);
+
+char buff[500] = "Given Length: " ;
+int k = strlen(buff);
+
+memcpy(buff+k,&len,2);
+
+send(sock,buff,k+2,0);
+
+return;
+
+}
+
+
+void goodIntCmd(int  sock, char * arr)
+{
+
+int j = atoi(arr);
+j = htons(j);
+char * m = "Good Int: ";
+char buf[strnlen(m)+4];
+
+memcpy(buf,m,strnlen(m));
+memcpy(buf+strlen(m),&j,4);
+send(sock,buff,strlen(m)+4);
+
+
+
+}
+
+void BadIntCmd(int  sock, char * arr)
+{
+
+int j = atoi(arr);
+j = htons(j);
+char * m = "Bad Int: ";
+char buf[strnlen(m)+4];
+
+memcpy(buf,m,strnlen(m));
+memcpy(buf+strlen(m),&j,4);
+send(sock,buff,strlen(m)+4);
+
+}
+
+
+int bytesAtATimeCmd(int sock, char * arr, int bytesread)
+{
+    int num_rcv = 1;
+
+
+    int num = atoi(arr);
+    num = ntol(num);
+    char buf = 0;
+    bytesread -= 4;
+// subtract what weve already Read
+if(bytesread >= num)
+{
+  return;
+}
+
+  num -= bytesread;
+
+
+
+int i = 0;
+
+while((i=recv(sock,buf,1,0))!=0 && num > 0)
+{
+  num -= i;
+  num_rcv++;
+}
+
+return num_rcv;
+
+}
+
+
+
+int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
+{
+    int num_rcv = 1;
+
+
+    int num = atoi(arr);
+    num = ntol(num);
+    char buf[1000] = 0;
+    bytesread -= 4;
+// subtract what weve already Read
+
+if(bytesread >= num)
+{
+  return;
+}
+
+    num -= bytesread;
+
+
+
+int i = 0;
+
+while((i=recv(sock,buf,1000,0))!=0 && num > 0)
+{
+  num -= i;
+  num_rcv++;
+}
+
+return num_rcv;
+
+}
+
+
+
 int main(int argc, char *argv[])
 {
     int servSock;                    /* Socket descriptor for server */
