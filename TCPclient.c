@@ -25,7 +25,10 @@ memset(buff,0,500);
 memcpy(buff,&cmd,1);
 memcpy(buff+1,string,strlen(string)+1);
 send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
-
+int i = 0 ;
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
@@ -56,6 +59,10 @@ memcpy(buff+1,&h,2);
 memcpy((buff+2+1),&sendt,strlen(sendt));
 
 send(sock,buff, (strlen(sendt)+2+1), 0);
+int i =0;
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
@@ -82,6 +89,12 @@ memcpy(buff+1,&int2send,4);
 
 send(sock,buff, 4+1 , 0);
 
+int i = 0;
+i = recv(sock,buff,500,0);
+int temp = buff[i-4];
+buff[i-4] = 0;
+printf("%s%d\n",buff,temp);
+
 
 }
 
@@ -105,6 +118,11 @@ memcpy(buff+1,&sendInt,4);
 
 send(sock,buff, 4 + 1 , 0);
 
+int i =0;
+i = recv(sock,buff,500,0);
+int temp = buff[i-4];
+buff[i-4] = 0;
+printf("%s%d\n",buff,temp);
 
 }
 
@@ -146,6 +164,10 @@ while(i<numsend)
 }
 
 
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
+
 }
 
 void KbyteAtATimeCmd(char * arg,int sock)
@@ -174,6 +196,9 @@ while(i<numsend)
   i++;
 }
 
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
@@ -189,9 +214,7 @@ int main(int argc, char *argv[])
     unsigned int StringLen;      /* Length of string to echo */
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                         and total bytes read */
-    int send = 3;
-
-
+  
 
  //   if (argc < 2)    /* Test for correct number of arguments */
    // {
@@ -228,25 +251,23 @@ totalBytesRcvd = 0;
 
 int i= 0; // holds bytes read on each call.
 
-while(1)
+while(i<2)
 {
 
 int secondwhilbytes = 0;
-char buf2[500];
-
-send()
-
-while((i = recv(sock, Buffer, RCVBUFSIZE - 1, 0))>0)
-{
-
-  printf("%s\n",Buffer);
-
-
-
+char * temp = "SHITTY SERVER";
+if(i==0){
+  send(sock,temp,sizeof(temp),0);
 }
+
+//nullTerminatedCmd("Send as a Null Terminated String.", sock);
+//givenLengthCmd("Sent as unterminated string",sock);
+
+
+i++;
+
 
 }
     close(sock);
     exit(0);
 }
-
