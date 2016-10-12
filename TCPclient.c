@@ -46,7 +46,7 @@ void noMoreCommands(int sock)
 int givenLengthCmd(char * sendt,int sock)
 {
 
-int16_t h = strlen(send);
+int16_t h = strlen(sendt);
 char buff[500];
 int8_t cmd = 2;
 
@@ -56,7 +56,7 @@ memcpy(buff,&cmd,1);
 
 
 memcpy(buff+1,&h,2);
-memcpy((buff+2+1),&sendt,strlen(sendt));
+memcpy((buff+2+1),sendt,strlen(sendt));
 
 send(sock,buff, (strlen(sendt)+2+1), 0);
 int i =0;
@@ -78,6 +78,7 @@ void badIntCmd(char * arg, int sock)
 {
 
 int int2send = atoi(arg);
+printf("%d\n", int2send);
 char buff[500];
 memset(buff,0,500);
 int8_t cmd = 3;
@@ -88,10 +89,13 @@ memcpy(buff,&cmd,1);
 memcpy(buff+1,&int2send,4);
 
 send(sock,buff, 4+1 , 0);
-
+printf("%s\n",buff);
 int i = 0;
 i = recv(sock,buff,500,0);
-int temp = buff[i-4];
+int temp;
+
+memcpy(&temp,buff+(i-4),4);
+
 buff[i-4] = 0;
 printf("%s%d\n",buff,temp);
 
@@ -106,13 +110,14 @@ void goodIntCmd(char * arg, int sock )
 {
 
 int sendInt = atoi(arg);
-int8_t cmd = 3;
+int8_t cmd = 4;
 
 sendInt = htonl(sendInt);
 
 char buff[500];
-memcpy(buff,&cmd,1);
 memset(buff,0,500);
+memcpy(buff,&cmd,1);
+
 
 memcpy(buff+1,&sendInt,4);
 
@@ -120,7 +125,10 @@ send(sock,buff, 4 + 1 , 0);
 
 int i =0;
 i = recv(sock,buff,500,0);
-int temp = buff[i-4];
+int temp;
+
+memcpy(&temp,buff+(i-4),4);
+
 buff[i-4] = 0;
 printf("%s%d\n",buff,temp);
 
@@ -142,7 +150,7 @@ void byteAtATimeCmd(char * arg,int sock)
 char buff[500];
 memset(buff,0,500);
 memcpy(buff,&cmd,1);
-memcpy(buff+1,hl,sizeof(int));
+memcpy(buff+1,&hl,sizeof(int));
 
 send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 
@@ -151,14 +159,8 @@ char bigbuf[1000];
 
 while(i<numsend)
 {
-  memset(bigbuf,(i%2),1000);
-  int j = 0;
-
-  while(j<1000)
-  {
+  memset(bigbuf,(i%2),1);
     send(sock,buff,1,0);
-    j++;
-  }
 
   i++;
 }
@@ -259,10 +261,11 @@ while(1)
 int secondwhilbytes = 0;
 char buf2[500];
 
-nullTerminatedCmd("Send as a Null Terminated String.", sock);
-givenLengthCmd("Sent as unterminated string",sock);
-
-
+//nullTerminatedCmd("Send as a Null Terminated String.", sock);
+//givenLengthCmd("Sent as unterminated string",sock);
+//goodIntCmd("13",sock);
+//badIntCmd("13",sock);
+byteAtATimeCmd("12",sock);
 
 
 
