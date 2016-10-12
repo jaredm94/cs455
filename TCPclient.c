@@ -16,11 +16,11 @@ exit(0);
 
 }
 
-void nullTerminatedCmd(char *string, int  sock)
+void nullTerminatedCmdC(char *string, int  sock)
 {
 
 char buff[500];
-int8_t cmd = 1;
+int8_t cmd = nullTerminatedCmd;
 memset(buff,0,500);
 memcpy(buff,&cmd,1);
 memcpy(buff+1,string,strlen(string)+1);
@@ -32,9 +32,8 @@ printf("%s\n",buff);
 
 }
 
-void noMoreCommands(int sock)
+void noMoreCommandsC(int sock)
 {
-
   close(sock);
 }
 
@@ -43,12 +42,12 @@ void noMoreCommands(int sock)
 * Send the string’s length as a 16 bit number in network byte order followed by the
 * characters of the string; do not include a null character.
 */
-int givenLengthCmd(char * sendt,int sock)
+int givenLengthCmdC(char * sendt,int sock)
 {
 
 int16_t h = strlen(sendt);
 char buff[500];
-int8_t cmd = 2;
+int8_t cmd = givenLengthCmd;
 
 h = htons(h);
 memset(buff,0,500);
@@ -74,7 +73,7 @@ printf("%s\n",buff);
 */
 
 
-void badIntCmd(char * arg, int sock)
+void badIntCmdC(char * arg, int sock)
 {
 
 int int2send = atoi(arg);
@@ -106,7 +105,7 @@ printf("%s%d\n",buff,temp);
 * For goodIntCmd:
 * Convert command.arg to an int and send the 4 bytes resulting from applying htonl() to it.
 */
-void goodIntCmd(char * arg, int sock )
+void goodIntCmdC(char * arg, int sock )
 {
 
 int sendInt = atoi(arg);
@@ -139,7 +138,7 @@ printf("%s%d\n",buff,temp);
 * that many bytes of alternr ating 1000-byte blocks of 0 bytes and 1 bytes.
 * ByteAtATime - use 1-byte sends and receives
 * KByteAtATime - use 1000-byte sends and receives (except for the last) */
-void byteAtATimeCmd(char * arg,int sock)
+void byteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
@@ -173,12 +172,11 @@ printf("%s\n",buff);
 
 }
 
-void KbyteAtATimeCmd(char * arg,int sock)
+void KbyteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
  int8_t cmd = 6;
-
 
 
 char buff[500];
@@ -262,12 +260,12 @@ while(1)
 int secondwhilbytes = 0;
 char buf2[500];
 
-//nullTerminatedCmd("Send as a Null Terminated String.", sock);
-//givenLengthCmd("Sent as unterminated string",sock);
-//goodIntCmd("13",sock);
-//badIntCmd("13",sock);
-byteAtATimeCmd("12",sock);
-
+nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+goodIntCmdC(commands[goodIntCmd].arg,sock);
+badIntCmdC(commands[badIntCmd].arg,sock);
+byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
 
