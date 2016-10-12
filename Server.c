@@ -17,6 +17,10 @@ fprintf(stderr,"%s",err);
 exit(0);
 
 }
+void printAddress(struct sockaddr_in client)
+{
+		        printf("%d.%d.%d.%d\n",(int)(client.sin_addr.s_addr&0xFF),(int)((client.sin_addr.s_addr&0xFF00)>>8),(int)((client.sin_addr.s_addr&0xFF0000)>>16),(int)((client.sin_addr.s_addr&0xFF000000)>>24));
+}
 
 void nullTerminatedCmd(int sock,char * arr, int bytesread)
 {
@@ -94,32 +98,42 @@ send(sock,buf,strlen(m)+4,0);
 int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
-
-
     int num;
     memcpy(&num,arr,4);
     num = ntohl(num);
     char buf = 0;
-    bytesread -= 5;
-// subtract what weve already Read
-if(bytesread >= num)
-{
-  return;
-}
+	char rplyBuf[500];
+	bytesread -= 5;
+	// subtract what weve already Read
+	if(bytesread >= num)
+	{
+	  return;
+	}
 
-  num -= bytesread;
+	num -= bytesread;
 
-
-
-int i = 0;
-
-while((i=recv(sock,buf,1,0))!=0 && num > 0)
-{
-  num -= i;
-  num_rcv++;
-}
-
-return num_rcv;
+	int i = 0;
+	num_rcv++;
+//	memcpy(&rplyBuf, cmdName, strlen(cmdName));
+//	char numRcvBuf[10];
+	num_rcv = htons(num_rcv);
+	sprintf(rplyBuf, "byteAtATimeCmd: %d", num_rcv);
+	send(sock, rplyBuf, 500, 0);
+	while(num > 0 && (i=recv(sock,buf,1,0))!= 0)
+	{
+		num -= i;
+		num_rcv++;
+	  	if(i>0)
+		  printf("i=%d\n", i);
+//	  	printf("num=%d\n", num);
+		memset(rplyBuf, 0, 500);
+		num_rcv = htons(num_rcv);
+		sprintf(rplyBuf, "Byte At A Time: %d", num_rcv);
+	  	send(sock, rplyBuf, 500, 0);
+	}
+	printf("bytes recieved: %d\n", num_rcv);
+	send(sock, rplyBuf, 500, 0);
+	return num_rcv;
 
 }
 
@@ -128,33 +142,39 @@ return num_rcv;
 int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
-
-
-    int num = atoi(arr);
+    int num;
+    memcpy(&num,arr,4);
     num = ntohl(num);
-    char buf[1000];
-    bytesread -= 4;
-// subtract what weve already Read
-
-if(bytesread >= num)
-{
-  return;
-}
-
+    char buf = 0;
+    char rplyBuf[1000];
+    bytesread -= 5;
+    // subtract what weve already Read
+    if(bytesread >= num)
+    {
+        return;
+    }
     num -= bytesread;
-
-
-
-int i = 0;
-
-while((i=recv(sock,buf,1000,0))!=0 && num > 0)
-{
-  num -= i;
-  num_rcv++;
-}
-
-return num_rcv;
-
+    int i = 0;
+    num_rcv++;
+//  memcpy(&rplyBuf, cmdName, strlen(cmdName));
+//  char numRcvBuf[10];
+  num_rcv = htons(num_rcv);
+  sprintf(rplyBuf, "KbyteAtATimeCmd: %d", num_rcv);
+  send(sock, rplyBuf, 1000, 0);
+  while(num > 0 && (i=recv(sock,buf,1000,0))!= 0)
+  {
+      num -= i;
+      num_rcv++;
+      if(i>0)
+          printf("i=%d\n", i);
+//      printf("num=%d\n", num);
+      memset(rplyBuf, 0, 1000);
+      num_rcv = htons(num_rcv);
+      sprintf(rplyBuf, "KByte At A Time: %d", num_rcv);
+      //send(sock, rplyBuf, 1000, 0);
+   }
+  send(sock, rplyBuf, 1000, 0);
+   return num_rcv;                                                                                
 }
 
 
@@ -170,7 +190,7 @@ int main(int argc, char *argv[])
     int totalBytesRecvd = 0;
 	char buffer[RCVBUFSIZE];
 	FILE *log;
-  printf("#3\n");
+//  printf("#3\n");
 	//log  = fopen("log.txt", 'a'); // open log file for append
 
     if (argc != 2)     /* Test for correct number of arguments */
@@ -185,21 +205,20 @@ int main(int argc, char *argv[])
     if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
-
+	printf("...Socket Open...\n");
     /* Construct local address structure */
     memset(&servAddr, 0, sizeof(servAddr));   /* Zero out structure */
     servAddr.sin_family = AF_INET;                /* Internet address family */
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     servAddr.sin_port = htons(servPort);      /* Local port */
-printf("#2\n");
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
         DieWithError("bind() failed");
-
-    /* Mark the socket so it will listen for incoming connections */
+	printf("...Server Bound...\n");
+	/* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
-printf("#1\n");
+	printf("...Server Listening...\n");
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */
@@ -221,10 +240,10 @@ printf("#1\n");
 
 			while(1)
 			{
+//				sleep(1);
+    		    read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
-        read = recv(clntSock, buffer+bytesRecvd, 100, 0);
-
-        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
+	        	printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
 
 				if(bytesRecvd == 0) // initial read
 				{
@@ -235,24 +254,31 @@ printf("#1\n");
 
 			    switch((int8_t)buffer[0])
 			    {
-					case 1:		read = 0;
+					case 1:		printf("nullTerminatedCmd() called\n");
+								read = 0;
 								nullTerminatedCmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmd(clntSock, buffer+1, read);
+					case 2:		printf("givenLengthcmd() called\n");
+								givenLengthcmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer+1);
+					case 3:		printf("goodIntCmd() called\n");
+								goodIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer+1);
+					case 4:		printf("BadIntCmd() called\n");
+								BadIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
-					case 5:		recvCalls++;
+					case 5:		printf("bytesAtATimeCmd() called\n");
+								recvCalls++;
 								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
-					case 6:		recvCalls++;
+					case 6:		printf("kbytesAtATimeCmd() called\n");
+								recvCalls++;
 								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
 		}
 	}
+	printf("total bytes read: %d\n", totalBytesRecvd);
 	close(servSock);
 //	fclose(log);
 	exit(0);

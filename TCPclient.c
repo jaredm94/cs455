@@ -1,4 +1,4 @@
-#include <stdio.h>      /* for printf() and fprintf() */
+#include <stdio.h>
 #include <sys/socket.h> /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>  /* for sockaddr_in and inet_addr() */
 #include <stdlib.h>     /* for atoi() and exit() */
@@ -9,11 +9,13 @@
 
 void DieWithError(char *err)
 {
+	fprintf(stderr,"%s",err);
+	exit(0);
+}
 
-fprintf(stderr,"%s",err);
-
-exit(0);
-
+void printAddress(struct sockaddr_in client)
+{
+		        printf("%d.%d.%d.%d\n",(int)(client.sin_addr.s_addr&0xFF),(int)((client.sin_addr.s_addr&0xFF00)>>8),(int)((client.sin_addr.s_addr&0xFF0000)>>16),(int)((client.sin_addr.s_addr&0xFF000000)>>24));
 }
 
 void nullTerminatedCmd(char *string, int  sock)
@@ -145,8 +147,6 @@ void byteAtATimeCmd(char * arg,int sock)
  int hl = htonl(numsend);
  int8_t cmd = 5;
 
-
-
 char buff[500];
 memset(buff,0,500);
 memcpy(buff,&cmd,1);
@@ -157,17 +157,21 @@ send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 int i = 0;
 char bigbuf[1000];
 
-while(i<numsend)
+int bytesToSend = 500000;
+while(i<bytesToSend)
 {
-  memset(bigbuf,(i%2),1);
-    send(sock,buff,1,0);
-
-  i++;
+//	printf("i=%d\n", i%2);
+	memset(buff,(i%2),1);
+	send(sock,buff,1,0);
+	memset(buff, 0, 500);
+	recv(sock,buff,500,0);
+//	printf("server: %s\n", buff);	
+	i++;
 }
-
-
-i = recv(sock,buff,500,0);
-buff[i] = 0;
+recv(sock, buff, 500, 0);
+//printf("recvd %d bytes\n", i);
+//buff[i] = 0;
+printf("bytes sent: %d\n", i);
 printf("%s\n",buff);
 
 }
@@ -175,33 +179,34 @@ printf("%s\n",buff);
 void KbyteAtATimeCmd(char * arg,int sock)
 {
  int numsend = atoi(arg);
- int hl = htonl(numsend);
- int8_t cmd = 6;
+  int hl = htonl(numsend);
+   int8_t cmd = 6;
 
+   char bigBuf[1000];
+   memset(bigBuf,0,500);
+   memcpy(bigBuf,&cmd,1);
+   memcpy(bigBuf+1,&hl,sizeof(int));
 
+   send(sock,bigBuf, 1+sizeof(int), 0);//  the first chunk
 
-char buff[500];
-memset(buff,0,500);
-memcpy(buff,&cmd,1);
-memcpy(buff+1,hl,sizeof(int));
+   int i = 0;
+   int bytesToSend = 500000;
 
-send(sock,buff, 1+sizeof(int), 0);//  the first chunk
-
-int i = 0;
-char bigbuf[1000];
-
-while(i<numsend)
-{
-  memset(bigbuf,(i%2),1000);
-  send(sock,buff,1000,0);
-
-  i++;
-}
-
-i = recv(sock,buff,500,0);
-buff[i] = 0;
-printf("%s\n",buff);
-
+   while(i<bytesToSend)
+   {
+	//	printf("i=%d\n", i%2);
+        memset(bigBuf,(i%2),1);
+        send(sock,bigBuf,1000,0);
+        memset(bigBuf, 0, 1000);
+        recv(sock,bigBuf,1000,0);
+	//  printf("server: %s\n", buff);   
+	    i++;
+    }
+		   
+    //printf("recvd %d bytes\n", i);
+    //buff[i] = 0;
+    printf("%s\n",bigBuf);
+		   		   
 }
 
 int main(int argc, char *argv[])
@@ -250,27 +255,24 @@ int main(int argc, char *argv[])
 
         printf("\nDone Connecting\n");
 
-totalBytesRcvd = 0;
+	totalBytesRcvd = 0;
 
 
-int i= 0; // holds bytes read on each call.
+	int i= 0; // holds bytes read on each call.
 
-while(1)
-{
+	//while(1)
+	//{
 
-int secondwhilbytes = 0;
-char buf2[500];
-
-//nullTerminatedCmd("Send as a Null Terminated String.", sock);
-//givenLengthCmd("Sent as unterminated string",sock);
-//goodIntCmd("13",sock);
-//badIntCmd("13",sock);
-byteAtATimeCmd("12",sock);
-
-
-
-
-}
+		int secondwhilbytes = 0;
+		char buf2[500];
+//		getchar();
+	nullTerminatedCmd("Send as a Null Terminated String.", sock);
+	givenLengthCmd("Sent as unterminated string",sock);
+	goodIntCmd("13",sock);
+	badIntCmd("13",sock);
+	byteAtATimeCmd("12",sock);
+	KbyteAtATimeCmd("13", sock);
+	//}
     close(sock);
     exit(0);
 }
