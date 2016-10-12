@@ -32,12 +32,12 @@ int16_t lenPack = 2 + len + k;
 
 char buffer[500];
 
-memcpy(buff,&lenPack,2);
-memcpy(buff+2, &buff,k);
-memcpy(buff+2+k,arr,len);
+memcpy(buffer,&lenPack,2);
+memcpy(buffer+2, &buff,k);
+memcpy(buffer+2+k,arr,len);
 
 
-send(sock,buff,lenPack,0);
+send(sock,buffer,lenPack,0);
 
 return;
 
