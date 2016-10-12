@@ -24,7 +24,7 @@ void nullTerminatedCmdS(int sock,char * arr, int bytesread)
 
 int16_t len = strlen(arr);
 
-char buff[500] = "Null Terminated: ";
+char buff[500] = commandNames[nullTerminatedCmd];
 int k = strlen(buff);
 
 memcpy(buff+k,arr,len);
@@ -48,7 +48,7 @@ memcpy(&len,arr,2);
 len = ntohs(len);
 
 
-char buff[500] = "Given Length: " ;
+char buff[500] = commandNames[givenLengthCommand];
 int k = strlen(buff);
 
 memcpy(buff+k,arr+2,len);
@@ -66,7 +66,7 @@ void goodIntCmdS(int  sock, char * arr)
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = "Good Int: ";
+char * m = commandNames[goodIntCmd];
 char buf[strlen(m)+4+1];
 
 memcpy(buf,m,strlen(m));
@@ -81,7 +81,7 @@ void BadIntCmdS(int  sock, char * arr)
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = "Bad Int: ";
+char * m = commandNames[badIntCmd];
 char buf[strlen(m)+4];
 
 memcpy(buf,m,strlen(m));
@@ -114,7 +114,7 @@ int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 //	memcpy(&rplyBuf, cmdName, strlen(cmdName));
 //	char numRcvBuf[10];
 	num_rcv = htons(num_rcv);
-	sprintf(rplyBuf, "byteAtATimeCmd: %d", num_rcv);
+	sprintf(rplyBuf, "%s: %d", commandNames[byteAtATimeCmd], num_rcv);
 	send(sock, rplyBuf, 500, 0);
 	while(num > 0)
 	{
@@ -127,7 +127,7 @@ int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 	  	printf("num=%d\n", num);
 		memset(rplyBuf, 0, 500);
 		num_rcv = htons(num_rcv);
-		sprintf(rplyBuf, "Byte At A Time: %d", num_rcv);
+		sprintf(rplyBuf, "%s: %d", commandNames[byteAtATimeCmd], num_rcv);
 		printf("num_rcv: %d\n", num_rcv);
 	  	send(sock, rplyBuf, 500, 0);
 		}
@@ -135,7 +135,6 @@ int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 	printf("bytes recieved: %d\n", num_rcv);
 	send(sock, rplyBuf, 500, 0);
 	return num_rcv;
-
 }
 
 
@@ -160,7 +159,7 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 //  memcpy(&rplyBuf, cmdName, strlen(cmdName));
 //  char numRcvBuf[10];
   num_rcv = htons(num_rcv);
-  sprintf(rplyBuf, "KbyteAtATimeCmd: %d", num_rcv);
+  sprintf(rplyBuf, "%s: %d", commandNames[kByteAtATimeCmd], num_rcv);
   send(sock, rplyBuf, 1000, 0);
   while(num > 0 && (i=recv(sock,buf,1000,0))!= 0)
   {
@@ -171,7 +170,7 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 //      printf("num=%d\n", num);
       memset(rplyBuf, 0, 1000);
       num_rcv = htons(num_rcv);
-      sprintf(rplyBuf, "KByte At A Time: %d", num_rcv);
+      sprintf(rplyBuf, "%s: %d", commandNames[kByteAtATimeCmd], num_rcv);
       //send(sock, rplyBuf, 1000, 0);
    }
   send(sock, rplyBuf, 1000, 0);

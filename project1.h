@@ -27,13 +27,13 @@ static command commands[] = {
 * indexed by the #define’d constants above
 */
 static char *commandNames[] = {
-"No More Commands",
-"Null Terminated:",
-"Given Length",
-"Bad Int",
-"Good Int",
-"Byte At A Time",
-"KByte At A Time"
+"No More Commands: ",
+"Null Terminated: ",
+"Given Length: ",
+"Bad Int: ",
+"Good Int: ",
+"Byte At A Time: ",
+"KByte At A Time: "
 };
 /* The maximum argument string length is 128 bytes */
 /*
