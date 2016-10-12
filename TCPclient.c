@@ -1,13 +1,11 @@
 #include <stdio.h>      /* for printf() and fprintf() */
-#include <sys/socket.h> /* for socket(), bind(), and connect() */
-#include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
+#include <sys/socket.h> /* for socket(), connect(), send(), and recv() */
+#include <arpa/inet.h>  /* for sockaddr_in and inet_addr() */
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 
-
-#define MAXPENDING 5    /* Maximum outstanding connection requests */
-#define RCVBUFSIZE 500
+#define RCVBUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *err)
 {
@@ -18,268 +16,261 @@ exit(0);
 
 }
 
-void nullTerminatedCmd(int sock,char * arr, int bytesread)
+void nullTerminatedCmd(char *string, int  sock)
 {
 
-
-int16_t len = strlen(arr);
-
-char buff[500] = "Null Terminated: ";
-int k = strlen(buff);
-
-memcpy(buff+k,arr,len);
-
-send(sock,buff,k+len,0);
-
-return;
+char buff[500];
+int8_t cmd = 1;
+memset(buff,0,500);
+memcpy(buff,&cmd,1);
+memcpy(buff+1,string,strlen(string)+1);
+send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
+int i = 0 ;
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
-
-
-void givenLengthcmd(int sock,char * arr, int bytesread)
+void noMoreCommands(int sock)
 {
 
-//char temp[2];
-// memcpy(temp,arr,2);
+  close(sock);
+}
 
-int16_t len;
-memcpy(&len,arr,2);
-len = ntohs(len);
+/*
+* For givenLengthCmd:
+* Send the string’s length as a 16 bit number in network byte order followed by the
+* characters of the string; do not include a null character.
+*/
+int givenLengthCmd(char * sendt,int sock)
+{
+
+int16_t h = strlen(sendt);
+char buff[500];
+int8_t cmd = 2;
+
+h = htons(h);
+memset(buff,0,500);
+memcpy(buff,&cmd,1);
 
 
-char buff[500] = "Given Length: " ;
-int k = strlen(buff);
+memcpy(buff+1,&h,2);
+memcpy((buff+2+1),sendt,strlen(sendt));
 
-memcpy(buff+k,arr+2,len);
-
-send(sock,buff,len+k,0);
-
-return;
+send(sock,buff, (strlen(sendt)+2+1), 0);
+int i =0;
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
+/*
+* For badIntCmd:
+* Convert command.arg to an int and send the 4 bytes without applying htonl() to the value.
+* This is the incorrect way to go! Note that the number you get back from the server won’t
+* be what was sent.
+*/
 
-void goodIntCmd(int  sock, char * arr)
+
+void badIntCmd(char * arg, int sock)
 {
 
-int j;
-memcpy(&j,arr,4);
-j = ntohl(j);
-char * m = "Good Int: ";
-char buf[strlen(m)+4+1];
+int int2send = atoi(arg);
+printf("%d\n", int2send);
+char buff[500];
+memset(buff,0,500);
+int8_t cmd = 3;
 
-memcpy(buf,m,strlen(m));
-memcpy(buf+strlen(m),&j,4);
-send(sock,buf,strlen(m)+4,0);
+
+memcpy(buff,&cmd,1);
+
+memcpy(buff+1,&int2send,4);
+
+send(sock,buff, 4+1 , 0);
+printf("%s\n",buff);
+int i = 0;
+i = recv(sock,buff,500,0);
+int temp;
+
+memcpy(&temp,buff+(i-4),4);
+
+buff[i-4] = 0;
+printf("%s%d\n",buff,temp);
+
 
 }
 
-void BadIntCmd(int  sock, char * arr)
+/*
+* For goodIntCmd:
+* Convert command.arg to an int and send the 4 bytes resulting from applying htonl() to it.
+*/
+void goodIntCmd(char * arg, int sock )
 {
 
-int j;
-memcpy(&j,arr,4);
-j = ntohl(j);
-char * m = "Bad Int: ";
-char buf[strlen(m)+4];
+int sendInt = atoi(arg);
+int8_t cmd = 4;
 
-memcpy(buf,m,strlen(m));
-memcpy(buf+strlen(m),&j,4);
-send(sock,buf,strlen(m)+4,0);
+sendInt = htonl(sendInt);
+
+char buff[500];
+memset(buff,0,500);
+memcpy(buff,&cmd,1);
+
+
+memcpy(buff+1,&sendInt,4);
+
+send(sock,buff, 4 + 1 , 0);
+
+int i =0;
+i = recv(sock,buff,500,0);
+int temp;
+
+memcpy(&temp,buff+(i-4),4);
+
+buff[i-4] = 0;
+printf("%s%d\n",buff,temp);
 
 }
 
-
-int bytesAtATimeCmd(int sock, char * arr, int bytesread)
+/* For byteAtATimeCmd and kByteAtATimeCmd:
+* Convert command.arg to an int; send the int (after apply htonl) and then send
+* that many bytes of alternr ating 1000-byte blocks of 0 bytes and 1 bytes.
+* ByteAtATime - use 1-byte sends and receives
+* KByteAtATime - use 1000-byte sends and receives (except for the last) */
+void byteAtATimeCmd(char * arg,int sock)
 {
-    int num_rcv = 1;
+ int numsend = atoi(arg);
+ int hl = htonl(numsend);
+ int8_t cmd = 5;
 
 
-    int num = atoi(arr);
-    num = ntohl(num);
-    char buf = 0;
-    bytesread -= 4;
-// subtract what weve already Read
-if(bytesread >= num)
-{
-  return;
-}
 
-  num -= bytesread;
+char buff[500];
+memset(buff,0,500);
+memcpy(buff,&cmd,1);
+memcpy(buff+1,&hl,sizeof(int));
 
-
+send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 
 int i = 0;
+char bigbuf[1000];
 
-while((i=recv(sock,buf,1,0))!=0 && num > 0)
+while(i<numsend)
 {
-  num -= i;
-  num_rcv++;
+  memset(bigbuf,(i%2),1);
+    send(sock,buff,1,0);
+
+  i++;
 }
 
-return num_rcv;
+
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
 
-
-
-int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
+void KbyteAtATimeCmd(char * arg,int sock)
 {
-    int num_rcv = 1;
+ int numsend = atoi(arg);
+ int hl = htonl(numsend);
+ int8_t cmd = 6;
 
 
-    int num = atoi(arr);
-    num = ntohl(num);
-    char buf[1000];
-    bytesread -= 5;
-// subtract what weve already Read
 
-if(bytesread >= num)
-{
-  return;
-}
+char buff[500];
+memset(buff,0,500);
+memcpy(buff,&cmd,1);
+memcpy(buff+1,hl,sizeof(int));
 
-    num -= bytesread;
-
-
+send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 
 int i = 0;
+char bigbuf[1000];
 
-while((i=recv(sock,buf,1000,0))!=0 && num > 0)
+while(i<numsend)
 {
-  num -= i;
-  num_rcv++;
+  memset(bigbuf,(i%2),1000);
+  send(sock,buff,1000,0);
+
+  i++;
 }
 
-return num_rcv;
+i = recv(sock,buff,500,0);
+buff[i] = 0;
+printf("%s\n",buff);
 
 }
-
-
 
 int main(int argc, char *argv[])
 {
-    int servSock;                    /* Socket descriptor for server */
-    int clntSock;                    /* Socket descriptor for client */
-    struct sockaddr_in servAddr; /* Local address */
-    struct sockaddr_in clntAddr; /* Client address */
-    unsigned short servPort;     /* Server port */
-    unsigned int clntLen;            /* Length of client address data structure */
-    int totalBytesRecvd = 0;
-	char buffer[RCVBUFSIZE];
-	FILE *log;
-  printf("#3\n");
-	//log  = fopen("log.txt", 'a'); // open log file for append
+  int whilebytesRcvd = 0;
+    int sock;                        /* Socket descriptor */
+    struct sockaddr_in ServAddr; /* Echo server address */
+    unsigned short ServPort;     /* Echo server port */
+    char *servIP;                    /* Server IP address (dotted quad) */
+    char *String;                /* String to send to echo server */
+    char Buffer[RCVBUFSIZE];     /* Buffer for echo string */
+    unsigned int StringLen;      /* Length of string to echo */
+    int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
+                                        and total bytes read */
+    int send = 3;
 
-    if (argc != 2)     /* Test for correct number of arguments */
-    {
-        fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
-        exit(1);
-    }
 
-    servPort = atoi(argv[1]);  /* First arg:  local port */
 
-    /* Create socket for incoming connections */
-    if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-    if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+ //   if (argc < 2)    /* Test for correct number of arguments */
+   // {
+     //  fprintf(stderr, "Usage: %s <Server IP> [<Port>]\n",
+       //        argv[0]);
+       //exit(1);
+    //}
+
+    servIP = argv[1];             /* First arg: server IP address (dotted quad) */
+            //port number
+
+
+    ServPort = atoi(argv[2]); /* Use given port, if any */
+
+
+    /* Create a reliable, stream socket using TCP */
+    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
 
-    /* Construct local address structure */
-    memset(&servAddr, 0, sizeof(servAddr));   /* Zero out structure */
-    servAddr.sin_family = AF_INET;                /* Internet address family */
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
-    servAddr.sin_port = htons(servPort);      /* Local port */
-printf("#2\n");
-    /* Bind to the local address */
-    if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
-        DieWithError("bind() failed");
+    /* Construct the server address structure */
+    memset(&ServAddr, 0, sizeof(ServAddr));     /* Zero out structure */
+    ServAddr.sin_family      = AF_INET;             /* Internet address family */
+    ServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
+    ServAddr.sin_port        = htons(ServPort); /* Server port */
 
-    /* Mark the socket so it will listen for incoming connections */
-    if (listen(servSock, MAXPENDING) < 0)
-        DieWithError("listen() failed");
-printf("#1\n");
-    for (;;) /* Run forever */
-    {
-        /* Set the size of the in-out parameter */
-        clntLen = sizeof(clntAddr);
+    /* Establish the connection to the echo server */
+    if (connect(sock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0)
+        DieWithError("connect() failed");
 
-        /* Wait for a client to connect */
-        if ((clntSock = accept(servSock, (struct sockaddr *) &clntAddr,&clntLen)) < 0)
-			DieWithError("accept() failed");
+        printf("\nDone Connecting\n");
 
-	    /* clntSock is connected to a client! */
-        printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
+totalBytesRcvd = 0;
 
-		int read = 0; // hold bytes read on each call
-		int recvCalls = 0;
-        while(1)
-		{
-			int bytesRecvd = 0;
-			char buf2[RCVBUFSIZE];
 
-			while(1)
-			{
+int i= 0; // holds bytes read on each call.
 
-        read = recv(clntSock, buffer+bytesRecvd, 100, 0);
-
-        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
-
-				if(bytesRecvd == 0) // initial read
-				{
-					memset(buf2, 0, RCVBUFSIZE); // reset buf2 to 0
-				}
-				bytesRecvd += read;
-				totalBytesRecvd += read;
-
-			    switch((int8_t)buffer[0])
-			    {
-					case 1:		read = 0;
-								nullTerminatedCmd(clntSock, buffer+1, read);
-								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmd(clntSock, buffer+1, read);
-								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer+1);
-								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer+1);
-								bytesRecvd = 0;									break; // goodIntCmd
-					case 5:		recvCalls++;
-								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
-					case 6:		recvCalls++;
-								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
-			    }
-				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
-			}
-		}
-	}
-	close(servSock);
-//	fclose(log);
-	exit(0);
-    /* NOT REACHED */
-}
-/*int serverByteAtATimeCmd(int sock, int numOps)
+while(1)
 {
-	char sendBuf[500];
-	char line[500];
-	int8_t netByteOrder = htons(numOps);         		// not sure if 'int8_t' is the proper type for network byte order
 
-	sprintf(line, "byteAtATimeCmd: %d", (numOps));  	// love love love love sprinf lolololol
-	int8_t netByteOrder = htons(strlen(line));
-	memcpy(sendBuf, netByteOrder, 2);
-	memcpy(sendBuf + 2, line, strlen(line));
-	send(sock, sendBuf, strlen(line) + 2, 0);			// netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
+int secondwhilbytes = 0;
+char buf2[500];
+
+//nullTerminatedCmd("Send as a Null Terminated String.", sock);
+//givenLengthCmd("Sent as unterminated string",sock);
+//goodIntCmd("13",sock);
+//badIntCmd("13",sock);
+byteAtATimeCmd("12",sock);
+
+
+
+
 }
-
-int serverKByteAtATimeCmd()
-{
-    char sendBuf[500];
-    char line[500];
-    int8_t netByteOrder = htons(numOps);                // not sure if 'int8_t' is the proper type for network byte order
-
-    sprintf(line, "kByteAtATimeCmd: %d", (numOps));    // love love love love sprintf lolololol
-    int8_t netByteOrder = htons(strlen(line));
-    memcpy(sendBuf, netByteOrder, 2);
-    memcpy(sendBuf + 2, line, strlen(line));
-    send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
+    close(sock);
+    exit(0);
 }
-*/
