@@ -4,6 +4,7 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
+#include "project1.h"
 
 #define RCVBUFSIZE 100   /* Size of receive buffer */
 
@@ -13,16 +14,11 @@ void DieWithError(char *err)
 	exit(0);
 }
 
-void printAddress(struct sockaddr_in client)
-{
-		        printf("%d.%d.%d.%d\n",(int)(client.sin_addr.s_addr&0xFF),(int)((client.sin_addr.s_addr&0xFF00)>>8),(int)((client.sin_addr.s_addr&0xFF0000)>>16),(int)((client.sin_addr.s_addr&0xFF000000)>>24));
-}
-
-void nullTerminatedCmd(char *string, int  sock)
+void nullTerminatedCmdC(char *string, int  sock)
 {
 
 char buff[500];
-int8_t cmd = 1;
+int8_t cmd = commands[nullTerminatedCmd].cmd;
 memset(buff,0,500);
 memcpy(buff,&cmd,1);
 memcpy(buff+1,string,strlen(string)+1);
@@ -34,7 +30,7 @@ printf("%s\n",buff);
 
 }
 
-void noMoreCommands(int sock)
+void noMoreCommandsC(int sock)
 {
 
   close(sock);
@@ -45,12 +41,12 @@ void noMoreCommands(int sock)
 * Send the string’s length as a 16 bit number in network byte order followed by the
 * characters of the string; do not include a null character.
 */
-int givenLengthCmd(char * sendt,int sock)
+int givenLengthCmdC(char * sendt,int sock)
 {
 
 int16_t h = strlen(sendt);
 char buff[500];
-int8_t cmd = 2;
+int8_t cmd = commands[givenLengthCmd].cmd;
 
 h = htons(h);
 memset(buff,0,500);
@@ -76,14 +72,14 @@ printf("%s\n",buff);
 */
 
 
-void badIntCmd(char * arg, int sock)
+void badIntCmdC(char * arg, int sock)
 {
 
 int int2send = atoi(arg);
 printf("%d\n", int2send);
 char buff[500];
 memset(buff,0,500);
-int8_t cmd = 3;
+int8_t cmd = commands[badIntCmd].cmd;
 
 
 memcpy(buff,&cmd,1);
@@ -108,11 +104,11 @@ printf("%s%d\n",buff,temp);
 * For goodIntCmd:
 * Convert command.arg to an int and send the 4 bytes resulting from applying htonl() to it.
 */
-void goodIntCmd(char * arg, int sock )
+void goodIntCmdC(char * arg, int sock )
 {
 
 int sendInt = atoi(arg);
-int8_t cmd = 4;
+int8_t cmd = commands[goodIntCmd].cmd;
 
 sendInt = htonl(sendInt);
 
@@ -141,11 +137,11 @@ printf("%s%d\n",buff,temp);
 * that many bytes of alternr ating 1000-byte blocks of 0 bytes and 1 bytes.
 * ByteAtATime - use 1-byte sends and receives
 * KByteAtATime - use 1000-byte sends and receives (except for the last) */
-void byteAtATimeCmd(char * arg,int sock)
+void byteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
- int8_t cmd = 5;
+ int8_t cmd = commands[byteAtATimeCmd].cmd;
 
 char buff[500];
 memset(buff,0,500);
@@ -176,11 +172,11 @@ printf("%s\n",buff);
 
 }
 
-void KbyteAtATimeCmd(char * arg,int sock)
+void KbyteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
   int hl = htonl(numsend);
-   int8_t cmd = 6;
+   int8_t cmd = commands[kByteAtATimeCmd].cmd;
 
    char bigBuf[1000];
    memset(bigBuf,0,500);
@@ -260,19 +256,17 @@ int main(int argc, char *argv[])
 
 	int i= 0; // holds bytes read on each call.
 
-	//while(1)
-	//{
-
-		int secondwhilbytes = 0;
-		char buf2[500];
+	int secondwhilbytes = 0;
+	char buf2[500];
 //		getchar();
-	nullTerminatedCmd("Send as a Null Terminated String.", sock);
-	givenLengthCmd("Sent as unterminated string",sock);
-	goodIntCmd("13",sock);
-	badIntCmd("13",sock);
-	byteAtATimeCmd("12",sock);
-	KbyteAtATimeCmd("13", sock);
-	//}
+//	nullTerminatedCmd("Send as a Null Terminated String.", sock);
+	nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+	
+	givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+	goodIntCmdC(commands[goodIntCmd].arg,sock);
+	badIntCmdC(commands[goodIntCmd].arg,sock);
+	byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+	KbyteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
     close(sock);
     exit(0);
 }

@@ -1,8 +1,3 @@
-typedef struct {
-unsigned cmd;
-char *arg;
-} command;
-
 #define nullTerminatedCmd (1)
 #define givenLengthCmd (2)
 #define badIntCmd (3)
@@ -10,6 +5,13 @@ char *arg;
 #define byteAtATimeCmd (5)
 #define kByteAtATimeCmd (6)
 #define noMoreCommands (0)
+
+typedef struct {
+	unsigned cmd;
+	char *arg;
+} command;
+
+
 /* This is the list of commands to be run by the client to demonstrate your program */
 static command commands[] = {
 {nullTerminatedCmd, "Sent as a null-terminated string"},

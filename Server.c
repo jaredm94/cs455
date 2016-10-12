@@ -17,12 +17,8 @@ fprintf(stderr,"%s",err);
 exit(0);
 
 }
-void printAddress(struct sockaddr_in client)
-{
-		        printf("%d.%d.%d.%d\n",(int)(client.sin_addr.s_addr&0xFF),(int)((client.sin_addr.s_addr&0xFF00)>>8),(int)((client.sin_addr.s_addr&0xFF0000)>>16),(int)((client.sin_addr.s_addr&0xFF000000)>>24));
-}
 
-void nullTerminatedCmd(int sock,char * arr, int bytesread)
+void nullTerminatedCmdS(int sock,char * arr, int bytesread)
 {
 
 
@@ -41,7 +37,7 @@ return;
 
 
 
-void givenLengthcmd(int sock,char * arr, int bytesread)
+void givenLengthcmdS(int sock,char * arr, int bytesread)
 {
 
 //char temp[2];
@@ -64,7 +60,7 @@ return;
 }
 
 
-void goodIntCmd(int  sock, char * arr)
+void goodIntCmdS(int  sock, char * arr)
 {
 
 int j;
@@ -79,7 +75,7 @@ send(sock,buf,strlen(m)+4,0);
 
 }
 
-void BadIntCmd(int  sock, char * arr)
+void BadIntCmdS(int  sock, char * arr)
 {
 
 int j;
@@ -95,7 +91,7 @@ send(sock,buf,strlen(m)+4,0);
 }
 
 
-int bytesAtATimeCmd(int sock, char * arr, int bytesread)
+int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
     int num;
@@ -144,7 +140,7 @@ int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 
 
 
-int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
+int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
     int num;
@@ -261,23 +257,23 @@ int main(int argc, char *argv[])
 			    {
 					case 1:		printf("nullTerminatedCmd() called\n");
 								read = 0;
-								nullTerminatedCmd(clntSock, buffer+1, read);
+								nullTerminatedCmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		printf("givenLengthcmd() called\n");
-								givenLengthcmd(clntSock, buffer+1, read);
+								givenLengthcmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
 					case 3:		printf("goodIntCmd() called\n");
-								goodIntCmd(clntSock, buffer+1);
+								goodIntCmdS(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
 					case 4:		printf("BadIntCmd() called\n");
-								BadIntCmd(clntSock, buffer+1);
+								BadIntCmdS(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		printf("bytesAtATimeCmd() called\n");
 								recvCalls++;
-								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
+								bytesAtATimeCmdS(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
 					case 6:		printf("kbytesAtATimeCmd() called\n");
 								recvCalls++;
-								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmdS(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
