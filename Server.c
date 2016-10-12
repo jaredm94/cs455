@@ -109,7 +109,8 @@ int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 	{
 	  return;
 	}
-
+//	printf("num: %d\n", num);
+//	getchar();
 	num -= bytesread;
 
 	int i = 0;
@@ -119,17 +120,21 @@ int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 	num_rcv = htons(num_rcv);
 	sprintf(rplyBuf, "byteAtATimeCmd: %d", num_rcv);
 	send(sock, rplyBuf, 500, 0);
-	while(num > 0 && (i=recv(sock,buf,1,0))!= 0)
+	while(num > 0)
 	{
+		if((i = recv(sock, buf, 1, 0)) > 0)
+		{
 		num -= i;
 		num_rcv++;
 	  	if(i>0)
 		  printf("i=%d\n", i);
-//	  	printf("num=%d\n", num);
+	  	printf("num=%d\n", num);
 		memset(rplyBuf, 0, 500);
 		num_rcv = htons(num_rcv);
 		sprintf(rplyBuf, "Byte At A Time: %d", num_rcv);
+		printf("num_rcv: %d\n", num_rcv);
 	  	send(sock, rplyBuf, 500, 0);
+		}
 	}
 	printf("bytes recieved: %d\n", num_rcv);
 	send(sock, rplyBuf, 500, 0);
