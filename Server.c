@@ -136,6 +136,17 @@ while((i=recv(sock,buf,1,0))!=0 && num > 0)
   num_rcv++;
 }
 
+char * m = "Byte At A Time: ";
+char buff[500];
+
+
+memcpy(buff,m,strlen(m));
+memcpy(buff+strlen(m),&num_rcv,4);
+
+send(sock,buff,strlen(m)+4,0);
+
+
+
 return num_rcv;
 
 }
@@ -169,6 +180,15 @@ while((i=recv(sock,buf,1000,0))!=0 && num > 0)
   num -= i;
   num_rcv++;
 }
+
+char * m = "KByte At A Time: ";
+char buff[500];
+
+
+memcpy(buff,m,strlen(m));
+memcpy(buff+strlen(m),&num_rcv,4);
+
+send(sock,buff,strlen(m)+4,0);
 
 return num_rcv;
 
