@@ -4,37 +4,39 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
+#include "project1.h"
 
 #define RCVBUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *err)
 {
 
-fprintf(stderr,"%s",err);
+	fprintf(stderr,"%s",err);
 
-exit(0);
+	exit(0);
 
 }
 
 void nullTerminatedCmdC(char *string, int  sock)
 {
 
-char buff[500];
-int8_t cmd = nullTerminatedCmd;
-memset(buff,0,500);
-memcpy(buff,&cmd,1);
-memcpy(buff+1,string,strlen(string)+1);
-send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
-int i = 0 ;
-i = recv(sock,buff,500,0);
-buff[i] = 0;
-printf("%s\n",buff);
+	char buff[500];
+	int8_t cmd = nullTerminatedCmd;
+	memset(buff,0,500);
+	memcpy(buff,&cmd,1);
+	memcpy(buff+1,string,strlen(string)+1);
+	send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
+	int i = 0 ;
+	i = recv(sock,buff,500,0);
+
+	buff[i] = 0;
+	printf("%s\n",buff);
 
 }
 
 void noMoreCommandsC(int sock)
 {
-  close(sock);
+	close(sock);
 }
 
 /*
@@ -45,23 +47,23 @@ void noMoreCommandsC(int sock)
 int givenLengthCmdC(char * sendt,int sock)
 {
 
-int16_t h = strlen(sendt);
-char buff[500];
-int8_t cmd = givenLengthCmd;
+	int16_t h = strlen(sendt);
+	char buff[500];
+	int8_t cmd = givenLengthCmd;
+	
+	h = htons(h);
+	memset(buff,0,500);
+	memcpy(buff,&cmd,1);
 
-h = htons(h);
-memset(buff,0,500);
-memcpy(buff,&cmd,1);
 
+	memcpy(buff+1,&h,2);
+	memcpy((buff+2+1),sendt,strlen(sendt));
 
-memcpy(buff+1,&h,2);
-memcpy((buff+2+1),sendt,strlen(sendt));
-
-send(sock,buff, (strlen(sendt)+2+1), 0);
-int i =0;
-i = recv(sock,buff,500,0);
-buff[i] = 0;
-printf("%s\n",buff);
+	send(sock,buff, (strlen(sendt)+2+1), 0);
+	int i =0;
+	i = recv(sock,buff,500,0);
+	buff[i] = 0;
+	printf("%s\n",buff);
 
 }
 
@@ -172,7 +174,7 @@ printf("%s\n",buff);
 
 }
 
-void KbyteAtATimeCmdC(char * arg,int sock)
+void kByteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
