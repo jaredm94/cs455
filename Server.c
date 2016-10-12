@@ -96,10 +96,11 @@ int bytesAtATimeCmd(int sock, char * arr, int bytesread)
     int num_rcv = 1;
 
 
-    int num = atoi(arr);
+    int num;
+    memcpy(&num,arr,4);
     num = ntohl(num);
     char buf = 0;
-    bytesread -= 4;
+    bytesread -= 5;
 // subtract what weve already Read
 if(bytesread >= num)
 {
