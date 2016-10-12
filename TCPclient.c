@@ -24,13 +24,24 @@ void nullTerminatedCmdC(char *string, int  sock)
 	int8_t cmd = nullTerminatedCmd;
 	memset(buff,0,500);
 	memcpy(buff,&cmd,1);
-	memcpy(buff+1,string,strlen(string)+1);
+	memcpy(buff,string,strlen(string)+1);
 	send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
 	int i = 0 ;
-	i = recv(sock,buff,500,0);
-
+	int count = 0;
+	
+	int16_t sLength, read;
+	
+	read = i = recv(sock, buff, 500, 0);
+	
+	memcpy(buff, &sLength, 2);
+	while(read < sLength && (i = recv(sock,buff+read,500,0)) > 0)
+	{
+		read += i;
+	}
+	if(i < 0)
+		DieWithError("..Error: nullTerminatedCmd Rcv Failed...\n");
 	buff[i] = 0;
-	printf("%s\n",buff);
+	printf("%s\n",buff[1]);
 
 }
 
@@ -60,11 +71,22 @@ int givenLengthCmdC(char * sendt,int sock)
 	memcpy((buff+2+1),sendt,strlen(sendt));
 
 	send(sock,buff, (strlen(sendt)+2+1), 0);
-	int i =0;
-	i = recv(sock,buff,500,0);
-	buff[i] = 0;
-	printf("%s\n",buff);
+/**** start recv server input *****/
 
+	int i = 0;
+	int count = 0;
+	int16_t sLength, read;
+	
+	read = i = recv(sock, buff, 500, 0);
+	memcpy(buff, &sLength, 2);
+	while(read < sLength && (i = recv(sock,buff+read,500,0)) > 0)
+	{
+		read += i;
+	}
+	if(i < 0)
+		DieWithError("..Error: getLengthCmd Rcv Failed...\n");
+	buff[i] = 0;
+	printf("%s\n",buff[1]);
 }
 
 /*
@@ -263,11 +285,11 @@ int secondwhilbytes = 0;
 char buf2[500];
 
 nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-goodIntCmdC(commands[goodIntCmd].arg,sock);
-badIntCmdC(commands[badIntCmd].arg,sock);
-byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
-kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
+//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+//goodIntCmdC(commands[goodIntCmd].arg,sock);
+//badIntCmdC(commands[badIntCmd].arg,sock);
+//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
 
