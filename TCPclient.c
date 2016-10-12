@@ -80,7 +80,7 @@ int int2send = atoi(arg);
 printf("%d\n", int2send);
 char buff[500];
 memset(buff,0,500);
-int8_t cmd = 3;
+int8_t cmd = badIntCmd ;
 
 
 memcpy(buff,&cmd,1);
@@ -109,7 +109,7 @@ void goodIntCmdC(char * arg, int sock )
 {
 
 int sendInt = atoi(arg);
-int8_t cmd = 4;
+int8_t cmd = goodIntCmd;
 
 sendInt = htonl(sendInt);
 
@@ -142,7 +142,7 @@ void byteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
- int8_t cmd = 5;
+ int8_t cmd = byteAtATimeCmd;
 
 
 
@@ -176,7 +176,7 @@ void KbyteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
- int8_t cmd = 6;
+ int8_t cmd = kByteAtATimeCmd;
 
 
 char buff[500];
