@@ -279,7 +279,7 @@ int serverKByteAtATimeCmd()
 
     sprintf(line, "kByteAtATimeCmd: %d", (numOps));    // love love love love sprintf lolololol
     int8_t netByteOrder = htons(strlen(line));
-    memcpy(sendBuf, netByteOrder, 2);
+    memcpy(sendBuf, netByteOrder, 2);f
     memcpy(sendBuf + 2, line, strlen(line));
     send(sock, sendBuf, strlen(line) + 2, 0);           // netbyteorder is supposed to be 16-bit = 2-bytes... hmmm... not sure...
 }
