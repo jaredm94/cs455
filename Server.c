@@ -154,7 +154,7 @@ char buff[500];
 
 size = strlen(m)+4 +2;
 
-memcpy(buff,&size,2)
+memcpy(buff,&size,2);
 memcpy(buff+2,m,strlen(m));
 memcpy(buff+strlen(m)+2,&num_rcv,4);
 
@@ -174,7 +174,7 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 
 
     int num;
-    int 16_t size;
+    int16_t size;
     memcpy(&num,arr,4);
     num = ntohl(num);
     char buf[1000];
@@ -203,7 +203,7 @@ char buff[500];
 
 size = strlen(m)+4 +2;
 
-memcpy(buff,&size,2)
+memcpy(buff,&size,2);
 memcpy(buff+2,m,strlen(m));
 memcpy(buff+strlen(m)+2,&num_rcv,4);
 
@@ -253,7 +253,7 @@ printf("#2\n");
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
         DieWithError("bind() failed");
-#1
+
 
 
     /* Mark the socket so it will listen for incoming connections */
