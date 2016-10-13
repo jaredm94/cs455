@@ -273,11 +273,12 @@ while(i<numsend)
 
 
 i = recv(sock,buff,500,0);
-int number;
-memcpy(&number,buff[i-4],4);
-buff[i-4] = 0;
-printf("%s",buff);
+int number =0;
+memcpy(&number,buff+i-4,4);
+buff[i-4] = '\0';
+printf("%s%d\n",buff,number);
 
+return;
 }
 
 void kByteAtATimeCmdC(char * arg,int sock)
@@ -290,7 +291,7 @@ void kByteAtATimeCmdC(char * arg,int sock)
 char buff[500];
 memset(buff,0,500);
 memcpy(buff,&cmd,1);
-memcpy(buff+1,hl,sizeof(int));
+memcpy(buff+1,&hl,sizeof(int));
 
 send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 
@@ -299,15 +300,26 @@ char bigbuf[1000];
 
 while(i<numsend)
 {
-  memset(bigbuf,(i%2),1000);
-  send(sock,buff,1000,0);
+	int8_t j = (i%2);
+	int x = 0;
+	while(x<1000)
+	{
+  memset(bigbuf+x,j,1);
+	x++;
+	}
 
-  i+=1000;
+send(sock,bigbuf,1000,0);
+
+	i++;
 }
-
 i = recv(sock,buff,500,0);
-buff[i] = 0;
-printf("%s\n",buff);
+int number =0;
+memcpy(&number,buff+i-4,4);
+buff[i-4] = '\0';
+printf("%s%d\n",buff,number);
+return;
+
+
 
 }
 
@@ -368,12 +380,12 @@ while(1)
 int secondwhilbytes = 0;
 char buf2[500];
 
-//nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-//goodIntCmdC(commands[goodIntCmd].arg,sock);
-//badIntCmdC(commands[badIntCmd].arg,sock);
-byteAtATimeCmdC("20",sock);
-//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
+nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+goodIntCmdC(commands[goodIntCmd].arg,sock);
+badIntCmdC(commands[badIntCmd].arg,sock);
+byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg,sock);
 
 
 
