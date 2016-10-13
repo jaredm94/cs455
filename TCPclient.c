@@ -24,24 +24,13 @@ void nullTerminatedCmdC(char *string, int  sock)
 	int8_t cmd = nullTerminatedCmd;
 	memset(buff,0,500);
 	memcpy(buff,&cmd,1);
-	memcpy(buff,string,strlen(string)+1);
+	memcpy(buff+1,string,strlen(string)+1);
 	send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
 	int i = 0 ;
-	int count = 0;
-	
-	int16_t sLength, read;
-	
-	read = i = recv(sock, buff, 500, 0);
-	
-	memcpy(buff, &sLength, 2);
-	while(read < sLength && (i = recv(sock,buff+read,500,0)) > 0)
-	{
-		read += i;
-	}
-	if(i < 0)
-		DieWithError("..Error: nullTerminatedCmd Rcv Failed...\n");
+	i = recv(sock,buff,500,0);
+
 	buff[i] = 0;
-	printf("%s\n",buff[1]);
+	printf("%s\n",buff+1);
 
 }
 
@@ -61,7 +50,7 @@ int givenLengthCmdC(char * sendt,int sock)
 	int16_t h = strlen(sendt);
 	char buff[500];
 	int8_t cmd = givenLengthCmd;
-	
+
 	h = htons(h);
 	memset(buff,0,500);
 	memcpy(buff,&cmd,1);
@@ -87,7 +76,8 @@ int givenLengthCmdC(char * sendt,int sock)
 	if(i < 0)
 		DieWithError("..Error: getLengthCmd Rcv Failed...\n");
 	buff[i] = 0;
-	printf("%s\n",buff[1]);
+	printf("%s\n",buff+1);
+
 }
 
 /*
@@ -113,16 +103,45 @@ memcpy(buff,&cmd,1);
 memcpy(buff+1,&int2send,4);
 
 send(sock,buff, 4+1 , 0);
-printf("%s\n",buff);
+
+
+/**** start recv server input *****/
+
 int i = 0;
+int count = 0;
+
 i = recv(sock,buff,500,0);
+count += i;
+
+int16_t recCount = 0;
+memcpy(&recCount,buff,2);
+
+
+while(1)
+{
+
+  if(recCount == count)
+  {
+    break;
+  }
+  else
+  {
+    if((i = recv(sock,buff,500,0))<=0)
+    {
+      DieWithError("Died in Bad Int.");
+    }
+    refcount += i;
+  }
+
+
+}
+
 int temp;
 
 memcpy(&temp,buff+(i-4),4);
 
 buff[i-4] = 0;
-printf("%s%d\n",buff,temp);
-
+printf("%s%d\n",buff+2,temp);
 
 }
 
@@ -146,15 +165,43 @@ memcpy(buff,&cmd,1);
 memcpy(buff+1,&sendInt,4);
 
 send(sock,buff, 4 + 1 , 0);
+/**** start recv server input *****/
 
-int i =0;
+int i = 0;
+int count = 0;
+
 i = recv(sock,buff,500,0);
+count += i;
+
+int16_t recCount = 0;
+memcpy(&recCount,buff,2);
+
+
+while(1)
+{
+
+  if(recCount == count)
+  {
+    break;
+  }
+  else
+  {
+    if((i = recv(sock,buff,500,0))<=0)
+    {
+      DieWithError("Died in Good Int.");
+    }
+    refcount += i;
+  }
+
+
+}
+
 int temp;
 
 memcpy(&temp,buff+(i-4),4);
 
 buff[i-4] = 0;
-printf("%s%d\n",buff,temp);
+printf("%s%d\n",buff+2,temp);
 
 }
 
@@ -286,11 +333,11 @@ int secondwhilbytes = 0;
 char buf2[500];
 
 nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-//goodIntCmdC(commands[goodIntCmd].arg,sock);
-//badIntCmdC(commands[badIntCmd].arg,sock);
-//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
-//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
+givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+goodIntCmdC(commands[goodIntCmd].arg,sock);
+badIntCmdC(commands[badIntCmd].arg,sock);
+byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
 

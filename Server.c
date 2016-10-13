@@ -48,6 +48,7 @@ void givenLengthcmd(int sock,char * arr, int bytesread)
 {
 
 //char temp[2];
+
 // memcpy(temp,arr,2);
 
 int16_t len;
