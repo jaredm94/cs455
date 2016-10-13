@@ -273,12 +273,12 @@ while(i<numsend)
 
 
 i = recv(sock,buff,500,0);
-int_t size = 0;
+int16_t size = 0;
 memcpy(&size,buff,2);
 
 while(size>i)
 {
-	i+ = recv(sock,buff+i,500,0);
+	i+= recv(sock,(buff+i),500,0);
 }
 
 
@@ -323,12 +323,12 @@ send(sock,bigbuf,1000,0);
 }
 
 i = recv(sock,buff,500,0);
-int_t size = 0;
+int16_t size = 0;
 memcpy(&size,buff,2);
 
 while(size>i)
 {
-	i+ = recv(sock,buff+i,500,0);
+	i+= recv(sock,(buff+i),500,0);
 }
 
 
