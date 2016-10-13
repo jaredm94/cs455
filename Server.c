@@ -4,7 +4,7 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
-
+#include "project1.h"
 
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
 #define RCVBUFSIZE 500
@@ -18,7 +18,7 @@ exit(0);
 
 }
 
-void nullTerminatedCmd(int sock,char * arr, int bytesread)
+void nullTerminatedCmdS(int sock,char * arr, int bytesread)
 {
 
 
@@ -44,7 +44,7 @@ return;
 
 
 
-void givenLengthcmd(int sock,char * arr, int bytesread)
+void givenLengthcmdS(int sock,char * arr, int bytesread)
 {
 
 //char temp[2];
@@ -57,7 +57,7 @@ len = ntohs(len);
 
 
 char buff[500];
-char * temp = "Given Length: " ;
+char temp = commandNames[givenLengthCmd] ;
 int templen = strlen(temp);
 
 int16_t total = templen + len+2;
@@ -73,13 +73,13 @@ return;
 }
 
 
-void goodIntCmd(int  sock, char * arr)
+void goodIntCmdS(int  sock, char * arr)
 {
 
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = "Good Int: ";
+char * m = commandNames[goodIntCmd];
 char buf[500];
 int16_t total  = strlen(m)+4+2;
 
@@ -90,13 +90,13 @@ send(sock,buf,total,0);
 
 }
 
-void BadIntCmd(int  sock, char * arr)
+void BadIntCmdS(int  sock, char * arr)
 {
 
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = "Bad Int: ";
+char * m = commandNames[badIntCmd];
 char buf[500];
 int16_t total  = strlen(m)+4+2;
 
@@ -108,7 +108,7 @@ send(sock,buf,total,0);
 }
 
 
-int bytesAtATimeCmd(int sock, char * arr, int bytesread)
+int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
 
@@ -153,7 +153,7 @@ return num_rcv;
 
 
 
-int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
+int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
 
@@ -273,18 +273,18 @@ printf("#1\n");
 			    switch((int8_t)buffer[0])
 			    {
 					case 1:		read = 0;
-								nullTerminatedCmd(clntSock, buffer+1, read);
+								nullTerminatedCmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmd(clntSock, buffer+1, read);
+					case 2:		givenLengthcmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer+1);
+					case 3:		goodIntCmdS(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer+1);
+					case 4:		BadIntCmdS(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
-								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
+								bytesAtATimeCmdS(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;
-								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmdS(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
