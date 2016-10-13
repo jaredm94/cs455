@@ -21,13 +21,15 @@ exit(0);
 void nullTerminatedCmdS(int sock,char * arr, int bytesread)
 {
 
-
+printf("#1\n");
 int16_t len = strlen(arr);
 
-
-char * buff= "Null Terminated: ";
-int k = strlen(buff);
-
+printf("#2\n");
+char buff[500];
+strcat(buff, commandNames[nullTerminatedCmd]);
+strcat(buff, arr);
+int k = strlen(buff) + 1; // add one for the null at the end
+printf("Server:%s", buff);
 int16_t lenPack = 2 + len + k;
 
 char buffer[500];
@@ -113,8 +115,9 @@ int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
     int num_rcv = 1;
 
 
-    int num;
-    memcpy(&num,arr,4);
+    int num = atoi(arr);
+    //memcpy(&num,arr,4);
+    printf("bytes to read: %d\n", num);
     num = ntohl(num);
     char buf = 0;
     bytesread -= 5;
@@ -194,8 +197,6 @@ return num_rcv;
 
 }
 
-
-
 int main(int argc, char *argv[])
 {
     int servSock;                    /* Socket descriptor for server */
@@ -207,7 +208,8 @@ int main(int argc, char *argv[])
     int totalBytesRecvd = 0;
 	char buffer[RCVBUFSIZE];
 	FILE *log;
-  printf("#3\n");
+	log = fopen("log.txt", "w");
+
 	//log  = fopen("log.txt", 'a'); // open log file for append
 
     if (argc != 2)     /* Test for correct number of arguments */
@@ -228,7 +230,6 @@ int main(int argc, char *argv[])
     servAddr.sin_family = AF_INET;                /* Internet address family */
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     servAddr.sin_port = htons(servPort);      /* Local port */
-printf("#2\n");
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
         DieWithError("bind() failed");
@@ -236,7 +237,6 @@ printf("#2\n");
     /* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
-printf("#1\n");
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */
@@ -261,19 +261,19 @@ printf("#1\n");
 
         read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
-        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
-
+        printf("Read Now %d!\n",(int8_t)buffer[0]);
 				if(bytesRecvd == 0) // initial read
 				{
 					memset(buf2, 0, RCVBUFSIZE); // reset buf2 to 0
 				}
 				bytesRecvd += read;
 				totalBytesRecvd += read;
-
+				//fwrite(buffer, sizeof(char), sizeof(buffer), log);
+				fflush(log);
+				fputs(buffer, log);
 			    switch((int8_t)buffer[0])
 			    {
-					case 1:		read = 0;
-								nullTerminatedCmdS(clntSock, buffer+1, read);
+					case 1:		nullTerminatedCmdS(clntSock, buffer, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		givenLengthcmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
@@ -291,7 +291,7 @@ printf("#1\n");
 		}
 	}
 	close(servSock);
-//	fclose(log);
+	fclose(log);
 	exit(0);
     /* NOT REACHED */
 }
