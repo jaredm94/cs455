@@ -109,7 +109,7 @@ int givenLengthCmdC(char * sendt,int sock)
 	if(i < 0)
 		DieWithError("..Error: getLengthCmd Rcv Failed...\n");
 	buff[i] = '\0';
-	printf("%s\n",buff+1);
+	printf("%s\n",buff+2);
 
 }
 
@@ -381,11 +381,11 @@ int secondwhilbytes = 0;
 char buf2[500];
 
 //nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+givenLengthCmdC(commands[givenLengthCmd].arg,sock);
 //goodIntCmdC(commands[goodIntCmd].arg,sock);
 //badIntCmdC(commands[badIntCmd].arg,sock);
 //byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
-kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg,sock);
+//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg,sock);
 
 
 
