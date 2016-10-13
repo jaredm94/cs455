@@ -277,10 +277,10 @@ printf("#1\n");
 								bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		givenLengthcmdS(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmdS(clntSock, buffer+1);
-								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmdS(clntSock, buffer+1);
+					case 3:		BadIntCmdS(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
+					case 4:		goodIntCmdS(clntSock, buffer+1);
+								bytesRecvd = 0;									break; // badIntCmd
 					case 5:		recvCalls++;
 								bytesAtATimeCmdS(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;

@@ -151,7 +151,7 @@ int temp;
 
 memcpy(&temp,buff+(i-4),4);
 
-buff[i-4] = 0;
+//buff[i-4] = 0;
 printf("%s%d\n",buff+2,temp);
 
 }
@@ -342,7 +342,7 @@ char buf2[500];
 
 //nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
 //givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-//goodIntCmdC(commands[goodIntCmd].arg,sock);
+goodIntCmdC(commands[goodIntCmd].arg,sock);
 badIntCmdC(commands[badIntCmd].arg,sock);
 //byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
 //kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
