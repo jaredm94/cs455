@@ -108,7 +108,7 @@ send(sock,buf,total,0);
 int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
-
+    int16_t size;
 
     int num;
     memcpy(&num,arr,4);
@@ -152,12 +152,14 @@ DieWithError("Die in bytes!");
 char * m = "Byte At A Time: ";
 char buff[500];
 
+size = strlen(m)+4 +2;
 
-memcpy(buff,m,strlen(m));
-memcpy(buff+strlen(m),&num_rcv,4);
+memcpy(buff,&size,2)
+memcpy(buff+2,m,strlen(m));
+memcpy(buff+strlen(m)+2,&num_rcv,4);
 
-send(sock,buff,strlen(m)+4,0);
 
+send(sock,buff,size,0);
 
 
 return num_rcv;
@@ -172,6 +174,7 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 
 
     int num;
+    int 16_t size;
     memcpy(&num,arr,4);
     num = ntohl(num);
     char buf[1000];
@@ -198,11 +201,14 @@ while((i=recv(sock,buf,1000,0))!=0 && num > 0)
 char * m = "KByte At A Time: ";
 char buff[500];
 
+size = strlen(m)+4 +2;
 
-memcpy(buff,m,strlen(m));
-memcpy(buff+strlen(m),&num_rcv,4);
+memcpy(buff,&size,2)
+memcpy(buff+2,m,strlen(m));
+memcpy(buff+strlen(m)+2,&num_rcv,4);
 
-send(sock,buff,strlen(m)+4,0);
+
+send(sock,buff,size,0);
 
 return num_rcv;
 
