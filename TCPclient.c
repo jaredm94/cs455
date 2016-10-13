@@ -26,11 +26,45 @@ void nullTerminatedCmdC(char *string, int  sock)
 	memcpy(buff,&cmd,1);
 	memcpy(buff+1,string,strlen(string)+1);
 	send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
-	int i = 0 ;
-	i = recv(sock,buff,500,0);
 
-	buff[i] = 0;
-	printf("%s\n",buff+1);
+  /**** start recv server input *****/
+
+  int i = 0;
+  int count = 0;
+
+  i = recv(sock,buff,500,0);
+  count += i;
+
+  int16_t recCount = 0;
+  memcpy(&recCount,buff,2);
+
+
+  while(1)
+  {
+
+    if(recCount == count)
+    {
+      break;
+    }
+    else
+    {
+      if((i = recv(sock,buff,500,0))<=0)
+      {
+        DieWithError("Died in NULL.");
+      }
+      recCount += i;
+    }
+
+
+  }
+
+  int temp;
+
+ // memcpy(&temp,buff+(i-4),4);
+
+ // buff[i-4] = 0;
+  printf("%s\n",buff+1);
+
 
 }
 
@@ -55,7 +89,6 @@ int givenLengthCmdC(char * sendt,int sock)
 	memset(buff,0,500);
 	memcpy(buff,&cmd,1);
 
-
 	memcpy(buff+1,&h,2);
 	memcpy((buff+2+1),sendt,strlen(sendt));
 
@@ -66,16 +99,16 @@ int givenLengthCmdC(char * sendt,int sock)
 	int count = 0;
 
 	int16_t sLength, read;
-	
+
 	read = i = recv(sock, buff, 500, 0);
-	memcpy(buff, &sLength, 2);
+	memcpy(&sLength,buff, 2);
 	while(read < sLength && (i = recv(sock,buff+read,500,0)) > 0)
 	{
 		read += i;
 	}
 	if(i < 0)
 		DieWithError("..Error: getLengthCmd Rcv Failed...\n");
-	buff[i] = 0;
+	buff[i] = '\0';
 	printf("%s\n",buff+1);
 
 }
@@ -92,7 +125,7 @@ void badIntCmdC(char * arg, int sock)
 {
 
 int int2send = atoi(arg);
-printf("%d\n", int2send);
+
 char buff[500];
 memset(buff,0,500);
 int8_t cmd = badIntCmd ;
@@ -326,19 +359,22 @@ totalBytesRcvd = 0;
 
 int i= 0; // holds bytes read on each call.
 
+while(1)
+{
+
 int secondwhilbytes = 0;
 char buf2[500];
 
-//nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+givenLengthCmdC(commands[givenLengthCmd].arg,sock);
 goodIntCmdC(commands[goodIntCmd].arg,sock);
-//badIntCmdC(commands[badIntCmd].arg,sock);
-//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
-//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
+badIntCmdC(commands[badIntCmd].arg,sock);
+byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
 
-
+}
     close(sock);
     exit(0);
 }
