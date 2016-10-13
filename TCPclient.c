@@ -75,6 +75,7 @@ int givenLengthCmdC(char * sendt,int sock)
 
 	int i = 0;
 	int count = 0;
+
 	int16_t sLength, read;
 	
 	read = i = recv(sock, buff, 500, 0);

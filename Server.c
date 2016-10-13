@@ -36,7 +36,6 @@ memcpy(buffer,&lenPack,2);
 memcpy(buffer+2, &buff,k);
 memcpy(buffer+2+k,arr,len);
 
-
 send(sock,buffer,lenPack,0);
 
 return;
