@@ -25,7 +25,7 @@ void nullTerminatedCmd(int sock,char * arr, int bytesread)
 int16_t len = strlen(arr);
 
 
-char * buff= "Null Terminated: ";
+char buff[500]= "Null Terminated: ";
 int k = strlen(buff);
 
 int16_t lenPack = 2 + len + k;
@@ -35,6 +35,7 @@ char buffer[500];
 memcpy(buffer,&lenPack,2);
 memcpy(buffer+2, &buff,k);
 memcpy(buffer+2+k,arr,len);
+
 
 send(sock,buffer,lenPack,0);
 
@@ -277,9 +278,9 @@ printf("#1\n");
 								bytesRecvd = 0;									break; // nullTerminatedCmd
 					case 2:		givenLengthcmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		goodIntCmd(clntSock, buffer+1);
+					case 3:		BadIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
-					case 4:		BadIntCmd(clntSock, buffer+1);
+					case 4:		goodIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
 								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
