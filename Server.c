@@ -4,7 +4,7 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
-#include "project1.h"
+
 
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
 #define RCVBUFSIZE 500
@@ -18,18 +18,16 @@ exit(0);
 
 }
 
-void nullTerminatedCmdS(int sock,char * arr, int bytesread)
+void nullTerminatedCmd(int sock,char * arr, int bytesread)
 {
 
-printf("#1\n");
+
 int16_t len = strlen(arr);
 
-printf("#2\n");
-char buff[500];
-strcat(buff, commandNames[nullTerminatedCmd]);
-strcat(buff, arr);
-int k = strlen(buff) + 1; // add one for the null at the end
-printf("Server:%s", buff);
+
+char buff[500]= "Null Terminated: ";
+int k = strlen(buff);
+
 int16_t lenPack = 2 + len + k;
 
 char buffer[500];
@@ -37,6 +35,7 @@ char buffer[500];
 memcpy(buffer,&lenPack,2);
 memcpy(buffer+2, &buff,k);
 memcpy(buffer+2+k,arr,len);
+
 
 send(sock,buffer,lenPack,0);
 
@@ -46,12 +45,8 @@ return;
 
 
 
-void givenLengthcmdS(int sock,char * arr, int bytesread)
+void givenLengthcmd(int sock,char * arr, int bytesread)
 {
-
-//char temp[2];
-
-// memcpy(temp,arr,2);
 
 int16_t len;
 memcpy(&len,arr,2);
@@ -59,14 +54,14 @@ len = ntohs(len);
 
 
 char buff[500];
-char temp = commandNames[givenLengthCmd] ;
+char * temp = "Given Length: " ;
 int templen = strlen(temp);
 
 int16_t total = templen + len+2;
 
 memcpy(buff,&total,2);
 memcpy(buff+2,temp,templen);
-memcpy(buff+2+templen,arr,len);
+memcpy(buff+2+templen,arr+2,len);
 
 send(sock,buff,total,0);
 
@@ -75,13 +70,13 @@ return;
 }
 
 
-void goodIntCmdS(int  sock, char * arr)
+void goodIntCmd(int  sock, char * arr)
 {
 
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = commandNames[goodIntCmd];
+char * m = "Good Int: ";
 char buf[500];
 int16_t total  = strlen(m)+4+2;
 
@@ -92,13 +87,13 @@ send(sock,buf,total,0);
 
 }
 
-void BadIntCmdS(int  sock, char * arr)
+void BadIntCmd(int  sock, char * arr)
 {
 
 int j;
 memcpy(&j,arr,4);
 j = ntohl(j);
-char * m = commandNames[badIntCmd];
+char * m = "Bad Int: ";
 char buf[500];
 int16_t total  = strlen(m)+4+2;
 
@@ -110,21 +105,30 @@ send(sock,buf,total,0);
 }
 
 
-int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
+int bytesAtATimeCmd(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
 
 
-    int num = atoi(arr);
-    //memcpy(&num,arr,4);
-    printf("bytes to read: %d\n", num);
+    int num;
+    memcpy(&num,arr,4);
     num = ntohl(num);
-    char buf = 0;
+    char buf[20];
     bytesread -= 5;
 // subtract what weve already Read
 if(bytesread >= num)
 {
-  return;
+
+char * m = "Byte At A Time: ";
+char buff[500];
+
+
+memcpy(buff,m,strlen(m));
+memcpy(buff+strlen(m),&num_rcv,4);
+
+send(sock,buff,strlen(m)+4,0);
+
+  return bytesread;
 }
 
   num -= bytesread;
@@ -133,8 +137,14 @@ if(bytesread >= num)
 
 int i = 0;
 
-while((i=recv(sock,buf,1,0))!=0 && num > 0)
+while( num > 0)
 {
+i=recv(sock,buf,1,0);
+if(i <= 0)
+{
+DieWithError("Die in bytes!");
+}
+
   num -= i;
   num_rcv++;
 }
@@ -156,7 +166,7 @@ return num_rcv;
 
 
 
-int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
+int kbytesAtATimeCmd(int sock, char * arr, int bytesread)
 {
     int num_rcv = 1;
 
@@ -197,6 +207,8 @@ return num_rcv;
 
 }
 
+
+
 int main(int argc, char *argv[])
 {
     int servSock;                    /* Socket descriptor for server */
@@ -208,9 +220,9 @@ int main(int argc, char *argv[])
     int totalBytesRecvd = 0;
 	char buffer[RCVBUFSIZE];
 	FILE *log;
-	log = fopen("log.txt", "w");
-
+  printf("#3\n");
 	//log  = fopen("log.txt", 'a'); // open log file for append
+
 
     if (argc != 2)     /* Test for correct number of arguments */
     {
@@ -230,13 +242,17 @@ int main(int argc, char *argv[])
     servAddr.sin_family = AF_INET;                /* Internet address family */
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     servAddr.sin_port = htons(servPort);      /* Local port */
+printf("#2\n");
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
         DieWithError("bind() failed");
+#1
+
 
     /* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
+printf("#1\n");
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */
@@ -261,37 +277,37 @@ int main(int argc, char *argv[])
 
         read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
-        printf("Read Now %d!\n",(int8_t)buffer[0]);
+        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
+
 				if(bytesRecvd == 0) // initial read
 				{
 					memset(buf2, 0, RCVBUFSIZE); // reset buf2 to 0
 				}
 				bytesRecvd += read;
 				totalBytesRecvd += read;
-				//fwrite(buffer, sizeof(char), sizeof(buffer), log);
-				fflush(log);
-				fputs(buffer, log);
+
 			    switch((int8_t)buffer[0])
 			    {
-					case 1:		nullTerminatedCmdS(clntSock, buffer, read);
+					case 1:		read = 0;
+								nullTerminatedCmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // nullTerminatedCmd
-					case 2:		givenLengthcmdS(clntSock, buffer+1, read);
+					case 2:		givenLengthcmd(clntSock, buffer+1, read);
 								bytesRecvd = 0;									break; // givenLengthCmd
-					case 3:		BadIntCmdS(clntSock, buffer+1);
-								bytesRecvd = 0;									break; // goodIntCmd
-					case 4:		goodIntCmdS(clntSock, buffer+1);
+					case 3:		BadIntCmd(clntSock, buffer+1);
 								bytesRecvd = 0;									break; // badIntCmd
+					case 4:		goodIntCmd(clntSock, buffer+1);
+								bytesRecvd = 0;									break; // goodIntCmd
 					case 5:		recvCalls++;
-								bytesAtATimeCmdS(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
+								bytesAtATimeCmd(clntSock, buffer+1, read);		break; // bytesAtATimeCmd
 					case 6:		recvCalls++;
-								kbytesAtATimeCmdS(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
+								kbytesAtATimeCmd(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
 			}
 		}
 	}
 	close(servSock);
-	fclose(log);
+//	fclose(log);
 	exit(0);
     /* NOT REACHED */
 }
