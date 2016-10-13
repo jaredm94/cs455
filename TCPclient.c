@@ -130,7 +130,7 @@ while(1)
     {
       DieWithError("Died in Bad Int.");
     }
-    refcount += i;
+    recCount += i;
   }
 
 
@@ -190,7 +190,7 @@ while(1)
     {
       DieWithError("Died in Good Int.");
     }
-    refcount += i;
+    recCount += i;
   }
 
 
@@ -326,22 +326,19 @@ totalBytesRcvd = 0;
 
 int i= 0; // holds bytes read on each call.
 
-while(1)
-{
-
 int secondwhilbytes = 0;
 char buf2[500];
 
-nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+//nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
 goodIntCmdC(commands[goodIntCmd].arg,sock);
-badIntCmdC(commands[badIntCmd].arg,sock);
-byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
-kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
+//badIntCmdC(commands[badIntCmd].arg,sock);
+//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+//kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
 
-}
+
     close(sock);
     exit(0);
 }
