@@ -23,9 +23,9 @@ void nullTerminatedCmdC(char *string, int  sock)
 	char buff[500];
 	int8_t cmd = nullTerminatedCmd;
 	memset(buff,0,500);
-	memcpy(buff,&cmd,2);
-	memcpy(buff+2,string,strlen(string)+1);
-	send(sock,buff, strlen(string)+2+1, 0);// +1 for the null
+	memcpy(buff,&cmd,1);
+	memcpy(buff+1,string,strlen(string)+1);
+	send(sock,buff, strlen(string)+1+1, 0);// +1 for the null
 
   /**** start recv server input *****/
 
@@ -62,8 +62,9 @@ void nullTerminatedCmdC(char *string, int  sock)
 
  // memcpy(&temp,buff+(i-4),4);
 
- // buff[i-4] = 0;
-  printf("%s\n",buff+1);
+    buff[i] = 0;
+  printf("%s\n",buff+2);
+
 
 }
 
@@ -100,7 +101,6 @@ int givenLengthCmdC(char * sendt,int sock)
 	int16_t sLength, read;
 
 	read = i = recv(sock, buff, 500, 0);
-
 	memcpy(&sLength,buff, 2);
 	while(read < sLength && (i = recv(sock,buff+read,500,0)) > 0)
 	{
@@ -173,7 +173,7 @@ int temp;
 
 memcpy(&temp,buff+(i-4),4);
 
-//buff[i-4] = 0;
+buff[i-4] = 0;
 printf("%s%d\n",buff+2,temp);
 
 }
@@ -249,9 +249,10 @@ void byteAtATimeCmdC(char * arg,int sock)
  int hl = htonl(numsend);
  int8_t cmd = byteAtATimeCmd;
 
+
+
 char buff[500];
 memset(buff,0,500);
-
 memcpy(buff,&cmd,1);
 memcpy(buff+1,&hl,sizeof(int));
 
@@ -259,11 +260,12 @@ send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 
 int i = 0;
 
-char bigbuf = 0;
+char bigbuf[10];
 
 while(i<numsend)
 {
-  memset(bigbuf,(i%2),1);
+		int8_t j = i%2;
+  memset(bigbuf,j,1);
     send(sock,bigbuf,1,0);
 
   i++;
@@ -271,8 +273,10 @@ while(i<numsend)
 
 
 i = recv(sock,buff,500,0);
-buff[i] = 0;
-printf("%s\n",buff);
+int number;
+memcpy(&number,buff[i-4],4);
+buff[i-4] = 0;
+printf("%s",buff);
 
 }
 
@@ -358,17 +362,22 @@ totalBytesRcvd = 0;
 
 int i= 0; // holds bytes read on each call.
 
+while(1)
+{
+
 int secondwhilbytes = 0;
 char buf2[500];
 
 //nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
 //givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-goodIntCmdC(commands[goodIntCmd].arg,sock);
+//goodIntCmdC(commands[goodIntCmd].arg,sock);
 //badIntCmdC(commands[badIntCmd].arg,sock);
-//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+byteAtATimeCmdC("20",sock);
 //kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg, sock);
 
 
+
+}
     close(sock);
     exit(0);
 }
