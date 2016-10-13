@@ -278,7 +278,7 @@ printf("#1\n");
 
         read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
-        printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
+      //  printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
 
 				if(bytesRecvd == 0) // initial read
 				{
