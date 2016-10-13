@@ -171,7 +171,8 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
     int num_rcv = 1;
 
 
-    int num = atoi(arr);
+    int num;
+    memcpy(&num,arr,4);
     num = ntohl(num);
     char buf[1000];
     bytesread -= 4;
