@@ -380,11 +380,11 @@ while(1)
 int secondwhilbytes = 0;
 char buf2[500];
 
-nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
-givenLengthCmdC(commands[givenLengthCmd].arg,sock);
-goodIntCmdC(commands[goodIntCmd].arg,sock);
-badIntCmdC(commands[badIntCmd].arg,sock);
-byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
+//nullTerminatedCmdC(commands[nullTerminatedCmd].arg, sock);
+//givenLengthCmdC(commands[givenLengthCmd].arg,sock);
+//goodIntCmdC(commands[goodIntCmd].arg,sock);
+//badIntCmdC(commands[badIntCmd].arg,sock);
+//byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
 kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg,sock);
 
 
