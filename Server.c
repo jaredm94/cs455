@@ -178,7 +178,7 @@ int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
     memcpy(&num,arr,4);
     num = ntohl(num);
     char buf[1000];
-    bytesread -= 4;
+    bytesread -= 5;
 // subtract what weve already Read
 
 if(bytesread >= num)
@@ -274,10 +274,7 @@ printf("#1\n");
 
 		int read = 0; // hold bytes read on each call
 		int recvCalls = 0;
-        while(1)
-		{
-			int bytesRecvd = 0;
-			char buf2[RCVBUFSIZE];
+
 
 			while(1)
 			{
@@ -286,6 +283,8 @@ printf("#1\n");
 			char buf2[RCVBUFSIZE];
 
         read = recv(clntSock, buffer+bytesRecvd, 100, 0);
+    if(read==0)
+        {break;}
 
       //  printf("Read Now %d: %s",(int8_t)buffer[0],buffer);
 
@@ -313,7 +312,7 @@ printf("#1\n");
 								kbytesAtATimeCmdS(clntSock, buffer+1, read);		break; // KbyteAtATimeCmd
 			    }
 				//fwrite(buffer, sizeof(buffer[0]), sizeof(buffer)/sizeof(buffer[0]), log);
-			}
+
 		}
 	}
 	close(servSock);
