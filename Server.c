@@ -107,7 +107,7 @@ send(sock,buf,total,0);
 
 int bytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
-    int num_rcv = 1;
+    int num_rcv = 0;
     int16_t size;
 
     int num;
@@ -170,7 +170,7 @@ return num_rcv;
 
 int kbytesAtATimeCmdS(int sock, char * arr, int bytesread)
 {
-    int num_rcv = 1;
+    int num_rcv = 0;
 
 
     int num;
@@ -192,7 +192,7 @@ if(bytesread >= num)
 
 int i = 0;
 
-while((i=recv(sock,buf,1000,0))!=0 && num > 0)
+while(num > 0 && (i=recv(sock,buf,1000,0))!=0)
 {
   num -= i;
   num_rcv++;
@@ -281,6 +281,9 @@ printf("#1\n");
 
 			while(1)
 			{
+
+            int bytesRecvd = 0;
+			char buf2[RCVBUFSIZE];
 
         read = recv(clntSock, buffer+bytesRecvd, 100, 0);
 
