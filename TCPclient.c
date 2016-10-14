@@ -71,6 +71,7 @@ void nullTerminatedCmdC(char *string, int  sock)
 void noMoreCommandsC(int sock)
 {
 	close(sock);
+	exit(69);
 }
 
 /*
@@ -294,7 +295,7 @@ void kByteAtATimeCmdC(char * arg,int sock)
 {
  int numsend = atoi(arg);
  int hl = htonl(numsend);
- int8_t cmd = kByteAtATimeCmd;
+ int8_t cmd = 6;
 
 
 char buff[500];
@@ -307,15 +308,13 @@ send(sock,buff, 1+sizeof(int), 0);//  the first chunk
 int i = 0;
 char bigbuf[1000];
 
-while(i<numsend)
+while(i<numsend/1000)
 {
 	int8_t j = (i%2);
 	int x = 0;
-	while(x<1000)
-	{
-  memset(bigbuf+x,j,1);
-	x++;
-	}
+
+  memset(bigbuf,j,1000);
+
 
 send(sock,bigbuf,1000,0);
 
@@ -406,6 +405,7 @@ goodIntCmdC(commands[goodIntCmd].arg,sock);
 badIntCmdC(commands[badIntCmd].arg,sock);
 byteAtATimeCmdC(commands[byteAtATimeCmd].arg,sock);
 kByteAtATimeCmdC(commands[kByteAtATimeCmd].arg,sock);
+noMoreCommandsC(sock);
 
 
 
